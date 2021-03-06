@@ -39,7 +39,7 @@ class CamManager(cameraManager: CameraManager) {
                         session.setRepeatingRequest(captureRequest.build(), object : CameraCaptureSession.CaptureCallback() {
                             override fun onCaptureStarted(session: CameraCaptureSession, request: CaptureRequest, timestamp: Long, frameNumber: Long) {
                                 super.onCaptureStarted(session, request, timestamp, frameNumber)
-                                Log.i(TAG, "camera ${session.device.id} capture started")
+//                                Log.i(TAG, "camera ${session.device.id} capture started")
                             }
                                                                                                                             }, handler)
                     }

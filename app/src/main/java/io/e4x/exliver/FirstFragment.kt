@@ -21,7 +21,13 @@ import io.e4x.exliver.vo.CameraSurface
 
 
 private const val PERMISSIONS_REQUEST_CODE = 10
-private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
+private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA,
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.MODIFY_AUDIO_SETTINGS,
+        Manifest.permission.SYSTEM_ALERT_WINDOW,
+        Manifest.permission.ACCESS_NOTIFICATION_POLICY)
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
