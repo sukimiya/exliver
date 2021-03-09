@@ -41,9 +41,7 @@ class FirstFragment : Fragment() {
     lateinit var camManager: CamManager
     val cameraList: List<CameraSurface> by lazy {
         listOf(CameraSurface(null, "0"),
-            CameraSurface(null, "1"),
-            CameraSurface(null, "2"),
-            CameraSurface(null, "3"))
+            CameraSurface(null, "1"))
     }
     var selected: MutableList<CameraSurface> = listOf(cameraList[0], cameraList[1]).toMutableList()
     var availableCameras: MutableList<CameraSurface>? = null
@@ -87,12 +85,6 @@ class FirstFragment : Fragment() {
                 }
                 "1" -> {
                     cameraSurface.surface = view.findViewById(R.id.surfaceView2)
-                }
-                "2" -> {
-                    cameraSurface.surface = view.findViewById(R.id.surfaceView3)
-                }
-                "3" -> {
-                    cameraSurface.surface = view.findViewById(R.id.surfaceView4)
                 }
             }
         }

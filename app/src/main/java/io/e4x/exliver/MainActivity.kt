@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity() {
                 throw IOException("folder can't be create")
             }
         }
-        var time = System.currentTimeMillis().toShort()
+        var time = System.currentTimeMillis().toString()
         return outputPath + File.separator + "mv" + time + ".mp4"
     }
     private fun shareScreen() {
@@ -198,7 +198,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object{
-        private const val REQUEST_SCREEN_RECORDER = 100
+        private const val REQUEST_SCREEN_RECORDER = 1
         private val STORAGE_FOLDER_NAME = "records"
         private val TAG = MainActivity::class.java.simpleName
     }
