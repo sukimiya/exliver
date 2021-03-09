@@ -1,39 +1,40 @@
 package io.e4x.exliver
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
-import android.hardware.display.DisplayManager
-import android.hardware.display.VirtualDisplay
-import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
-import android.os.Environment
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import com.tbruyelle.rxpermissions2.RxPermissions
-import java.io.File
-import java.io.IOException
+import live.rtmp.OnConntionListener
+import live.rtmp.RtmpHelper
+import live.rtmp.encoder.BasePushEncoder
+import live.rtmp.encoder.PushEncode
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.OnMediaInfoListener {
 
-    private lateinit var mVirtualDisplay: VirtualDisplay
+    private lateinit var pushEncode: PushEncode
+    private lateinit var rtmpHelper: RtmpHelper
+    private var livingURL = "rtmp://192.168.43.128:1935/oflaDemo/livetest"
     private lateinit var mMediaProjectionCallback: MediaProjectionCallback
     private var mProjectionManager: MediaProjectionManager? = null
     private var mScreenDensity: Int = 0
-    private var mMediaRecorder: MediaRecorder? = null
     private var mMediaProjection: MediaProjection? = null
-    lateinit var mMediaProjectionManager:MediaProjectionManager
     lateinit var recordBounds:Rect
     private lateinit var btnRecorder: ToggleButton
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -43,14 +44,17 @@ class MainActivity : AppCompatActivity() {
         btnRecorder = findViewById<ToggleButton>(R.id.fab)
         // Build ScreenRecorder
         val rxPermissions = RxPermissions(this)
-        val disposble = rxPermissions.request(
+        rxPermissions.request(
+            Manifest.permission.INTERNET,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.CAMERA
         ).subscribe {
             if (it) {
-                createRecorder()
+                createLiver()
+            } else {
+                Toast.makeText(this, "请设置权限", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -59,10 +63,17 @@ class MainActivity : AppCompatActivity() {
         when(requestCode) {
             REQUEST_SCREEN_RECORDER -> {
                 data?.let {
-                    mMediaProjection = mProjectionManager!!.getMediaProjection(resultCode, data!!)
-                    mMediaProjection!!.registerCallback(mMediaProjectionCallback, null)
-                    mVirtualDisplay = createVirtualDisplay()
-                    mMediaRecorder!!.start()
+                    try {
+                        mMediaProjection =
+                            mProjectionManager!!.getMediaProjection(resultCode, data!!)
+                        mMediaProjection!!.registerCallback(mMediaProjectionCallback, null)
+                        rtmpHelper = RtmpHelper()
+                        rtmpHelper.setOnConntionListener(this)
+                        rtmpHelper.initLivePush(livingURL)
+
+                    } catch(e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }
@@ -89,110 +100,44 @@ class MainActivity : AppCompatActivity() {
             mMediaProjection = null
         }
     }
-    fun createRecorder() {
-        val metrics = DisplayMetrics()
-        getWindowManager().getDefaultDisplay().getMetrics(metrics)
-        mScreenDensity = metrics.densityDpi
+    fun createLiver() {
+        if (mScreenDensity == 0) {
+            val metrics = DisplayMetrics()
+            windowManager.defaultDisplay.getMetrics(metrics)
+            mScreenDensity = metrics.densityDpi
+        }
 
-        initRecorder()
-        prepareRecorder()
         mProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager?
 
         btnRecorder.setOnClickListener { v -> onToggleScreenShare(v) }
         mMediaProjectionCallback = MediaProjectionCallback()
+
+        if (mMediaProjection == null) {
+            startActivityForResult(
+                mProjectionManager!!.createScreenCaptureIntent(),
+                REQUEST_SCREEN_RECORDER
+            )
+            return
+        }
     }
 
     private fun onToggleScreenShare(v: View?) {
         if ((v as ToggleButton).isChecked) {
-            shareScreen()
+            Log.v(TAG, "living start")
         } else {
-            mMediaRecorder!!.stop()
-            mMediaRecorder!!.reset()
-            Log.v(TAG, "Recording Stopped")
-            stopScreenSharing()
-        }
-    }
+            // stop living
 
-    fun initRecorder(){
-        if (mMediaRecorder == null) {
-            mMediaRecorder = MediaRecorder()
-            mMediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.MIC)
-            mMediaRecorder!!.setVideoSource(MediaRecorder.VideoSource.SURFACE)
-            mMediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            mMediaRecorder!!.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-            mMediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB)
-            mMediaRecorder!!.setVideoEncodingBitRate(512 * 4000)
-            mMediaRecorder!!.setVideoFrameRate(30)
-            mMediaRecorder!!.setVideoSize(recordBounds.width(), recordBounds.height())
-            mMediaRecorder!!.setOutputFile(getFilePath())
+            Log.v(TAG, "living Stopped")
         }
-    }
-    private fun prepareRecorder() {
-        try {
-            mMediaRecorder!!.prepare()
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
-            finish()
-        } catch (e: IOException) {
-            e.printStackTrace()
-            finish()
-        }
-    }
-    fun getFilePath():String{
-        var outputPath = getExternalFilesDir(Environment.DIRECTORY_DCIM)?.absolutePath + File.separator + STORAGE_FOLDER_NAME
-        var folder = File(outputPath)
-        if(!folder.exists()) {
-            if(!folder.mkdir()){
-                throw IOException("folder can't be create")
-            }
-        }
-        var time = System.currentTimeMillis().toString()
-        return outputPath + File.separator + "mv" + time + ".mp4"
-    }
-    private fun shareScreen() {
-        if (mMediaProjection == null) {
-            startActivityForResult(
-                    mProjectionManager!!.createScreenCaptureIntent(),
-                    REQUEST_SCREEN_RECORDER
-            )
-            return
-        }
-        if(mMediaRecorder == null)
-        {
-            initRecorder()
-            prepareRecorder()
-        }
-        mVirtualDisplay = createVirtualDisplay()
-        mMediaRecorder!!.start()
-    }
-
-    private fun stopScreenSharing() {
-        if (mVirtualDisplay == null) {
-            return
-        }
-        mVirtualDisplay!!.release()
-        mMediaRecorder=null
-        //    mMediaRecorder!!.release()
-    }
-
-    private fun createVirtualDisplay(): VirtualDisplay {
-        return mMediaProjection!!.createVirtualDisplay(
-                "MainActivity",
-                recordBounds.width(), recordBounds.height(), mScreenDensity,
-                DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                mMediaRecorder?.surface, null /*Callbacks*/, null /*Handler*/
-        )
     }
     private inner class MediaProjectionCallback : MediaProjection.Callback() {
         override fun onStop() {
             if (btnRecorder!!.isChecked) {
                 btnRecorder!!.isChecked = false
-                mMediaRecorder!!.stop()
-                mMediaRecorder!!.reset()
+                // mMediaRecorder.stop
                 Log.v(TAG, "Recording Stopped")
             }
-            mMediaProjection = null
-            stopScreenSharing()
+//            mMediaProjection = null
             Log.i(TAG, "MediaProjection Stopped")
         }
     }
@@ -201,5 +146,42 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_SCREEN_RECORDER = 1
         private val STORAGE_FOLDER_NAME = "records"
         private val TAG = MainActivity::class.java.simpleName
+    }
+
+    override fun onConntecting() {
+        Log.e(TAG, "RTMPHelper onConntecting")
+    }
+
+    override fun onConntectSuccess() {
+        Log.e(TAG, "RTMPHelper onConntectSuccess")
+        startPush()
+    }
+    private fun startPush() {
+        pushEncode = PushEncode(this)
+        pushEncode.initEncoder(true, mMediaProjection, 480, 720, 44100, 2, 16)
+        pushEncode.setOnMediaInfoListener(this)
+        pushEncode.start()
+    }
+
+    override fun onConntectFail(msg: String?) {
+        Log.e(TAG, "PushEncode onConntectFail")
+        btnRecorder.isChecked = false
+    }
+
+    override fun onMediaTime(times: Int) { }
+
+    override fun onSPSPPSInfo(sps: ByteArray?, pps: ByteArray?) {
+        if (rtmpHelper == null) return
+        rtmpHelper.pushSPSPPS(sps, pps)
+    }
+
+    override fun onVideoDataInfo(data: ByteArray?, keyFrame: Boolean) {
+        if (rtmpHelper == null) return
+        rtmpHelper.pushVideoData(data, keyFrame)
+    }
+
+    override fun onAudioInfo(data: ByteArray?) {
+        if (rtmpHelper == null) return
+        rtmpHelper.pushAudioData(data)
     }
 }
