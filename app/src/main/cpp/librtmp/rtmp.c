@@ -1612,6 +1612,7 @@ SendFCUnpublish(RTMP *r) {
 SAVC(publish);
 SAVC(live);
 SAVC(record);
+SAVC(append);
 
 static int
 SendPublish(RTMP *r) {
@@ -1621,7 +1622,7 @@ SendPublish(RTMP *r) {
 
     packet.m_nChannel = 0x04;    /* source channel (invoke) */
     packet.m_headerType = RTMP_PACKET_SIZE_LARGE;
-    packet.m_packetType = 0x14;    /* INVOKE */
+    packet.m_packetType = RTMP_PACKET_TYPE_INVOKE;
     packet.m_nTimeStamp = 0;
     packet.m_nInfoField2 = r->m_stream_id;
     packet.m_hasAbsTimestamp = 0;
@@ -1636,12 +1637,27 @@ SendPublish(RTMP *r) {
         return FALSE;
 
     /* FIXME: should we choose live based on Link.lFlags & RTMP_LF_LIVE? */
-    enc = AMF_EncodeString(enc, pend, &av_live);
+    //根据不同的参数来设置不同的推送方式
+    if (r->Link.lFlags & RTMP_LF_PUBLISH_LIVE)
+    {
+        enc = AMF_EncodeString(enc, pend, &av_live);
+    }
+    else if (r->Link.lFlags & RTMP_LF_PUBLISH_RECORD)
+    {
+        enc = AMF_EncodeString(enc, pend, &av_record);
+    }
+    else if (r->Link.lFlags & RTMP_LF_PUBLISH_APPEND)
+    {
+        enc = AMF_EncodeString(enc, pend, &av_append);
+    }
+    else
+    {
+        enc = AMF_EncodeString(enc, pend, &av_live);
+    }
     if (!enc)
         return FALSE;
 
     packet.m_nBodySize = enc - packet.m_body;
-
     return RTMP_SendPacket(r, &packet, TRUE);
 }
 

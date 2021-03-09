@@ -57,7 +57,7 @@ void *callbackPush(void *data) {
         RTMPPacket *packet = rtmpPush->queue->getRtmpPacket();
         if (packet) {
             // queue 缓存队列大小
-            int result = RTMP_SendPacket(rtmpPush->rtmp, packet, 3);
+            int result = RTMP_SendPacket(rtmpPush->rtmp, packet, 1);
 //            LOGD("t:%d", result);
             RTMPPacket_Free(packet);
             free(packet);
@@ -70,6 +70,7 @@ void *callbackPush(void *data) {
     RTMP_Close(rtmpPush->rtmp);
     RTMP_Free(rtmpPush->rtmp);
     rtmpPush->rtmp = NULL;
+    LOGD("t exit");
     pthread_exit(&rtmpPush->push_thrad);
 }
 

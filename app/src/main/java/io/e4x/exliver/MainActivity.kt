@@ -17,23 +17,28 @@ import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import com.tbruyelle.rxpermissions2.RxPermissions
+import io.e4x.exliver.vo.RecordVO
 import live.rtmp.OnConntionListener
 import live.rtmp.RtmpHelper
 import live.rtmp.encoder.BasePushEncoder
 import live.rtmp.encoder.PushEncode
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.OnMediaInfoListener {
 
     private lateinit var pushEncode: PushEncode
-    private lateinit var rtmpHelper: RtmpHelper
-    private var livingURL = "rtmp://192.168.43.128:1935/oflaDemo/livetest"
+    private var rtmpHelper: RtmpHelper? = null
+    private var livingURL = "rtmp://192.168.31.61:1935/oflaDemo/"
     private lateinit var mMediaProjectionCallback: MediaProjectionCallback
     private var mProjectionManager: MediaProjectionManager? = null
     private var mScreenDensity: Int = 0
     private var mMediaProjection: MediaProjection? = null
     lateinit var recordBounds:Rect
     private lateinit var btnRecorder: ToggleButton
+    private var listRecord: MutableList<RecordVO> = ArrayList()
+    private var liveUrl:String = ""
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,8 +73,14 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
                             mProjectionManager!!.getMediaProjection(resultCode, data!!)
                         mMediaProjection!!.registerCallback(mMediaProjectionCallback, null)
                         rtmpHelper = RtmpHelper()
-                        rtmpHelper.setOnConntionListener(this)
-                        rtmpHelper.initLivePush(livingURL)
+                        rtmpHelper?.setOnConntionListener(this)
+
+                        var time = System.currentTimeMillis().toString()
+                        var recordName = "mv" + System.currentTimeMillis().toString()
+                        var newRecord = RecordVO(time, recordName)
+                        var liveUrl = livingURL + recordName
+                        listRecord.add(newRecord)
+                        rtmpHelper?.initLivePush(liveUrl)
 
                     } catch(e: Exception) {
                         e.printStackTrace()
@@ -119,14 +130,24 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
             )
             return
         }
+        btnRecorder.isChecked = true
     }
 
     private fun onToggleScreenShare(v: View?) {
         if ((v as ToggleButton).isChecked) {
-            Log.v(TAG, "living start")
+            if (mMediaProjection == null) {
+                startActivityForResult(
+                    mProjectionManager!!.createScreenCaptureIntent(),
+                    REQUEST_SCREEN_RECORDER
+                )
+            }
+            Log.v(TAG, "living start : " + liveUrl)
         } else {
             // stop living
-
+            rtmpHelper?.stop()
+            mMediaProjection?.stop()
+            rtmpHelper = null
+            mMediaProjection = null
             Log.v(TAG, "living Stopped")
         }
     }
@@ -140,12 +161,6 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
 //            mMediaProjection = null
             Log.i(TAG, "MediaProjection Stopped")
         }
-    }
-
-    companion object{
-        private const val REQUEST_SCREEN_RECORDER = 1
-        private val STORAGE_FOLDER_NAME = "records"
-        private val TAG = MainActivity::class.java.simpleName
     }
 
     override fun onConntecting() {
@@ -172,16 +187,24 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
 
     override fun onSPSPPSInfo(sps: ByteArray?, pps: ByteArray?) {
         if (rtmpHelper == null) return
-        rtmpHelper.pushSPSPPS(sps, pps)
+        rtmpHelper?.pushSPSPPS(sps, pps)
     }
 
     override fun onVideoDataInfo(data: ByteArray?, keyFrame: Boolean) {
         if (rtmpHelper == null) return
-        rtmpHelper.pushVideoData(data, keyFrame)
+        rtmpHelper?.pushVideoData(data, keyFrame)
     }
 
     override fun onAudioInfo(data: ByteArray?) {
         if (rtmpHelper == null) return
-        rtmpHelper.pushAudioData(data)
+        rtmpHelper?.pushAudioData(data)
     }
+
+    companion object{
+        private const val RECORD_LIST_SIZE = 30
+        private const val REQUEST_SCREEN_RECORDER = 1
+        private val STORAGE_FOLDER_NAME = "records"
+        private val TAG = MainActivity::class.java.simpleName
+    }
+
 }

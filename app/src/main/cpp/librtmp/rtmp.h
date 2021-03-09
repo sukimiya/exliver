@@ -49,6 +49,16 @@ extern "C"
 #define RTMP_FEATURE_WRITE	0x10	/* publish, not play */
 #define RTMP_FEATURE_HTTP2	0x20	/* server-side rtmpt */
 
+#define RTMP_LF_AUTH 0x0001 /* using auth param */
+#define RTMP_LF_LIVE 0x0002 /* stream is live */
+#define RTMP_LF_SWFV 0x0004 /* do SWF verification */
+#define RTMP_LF_PLST 0x0008 /* send playlist before play */
+#define RTMP_LF_BUFX 0x0010 /* toggle stream on BufferEmpty msg */
+#define RTMP_LF_FTCU 0x0020 /* free tcUrl on close */
+#define RTMP_LF_PUBLISH_LIVE 0x0040 /* publish in LIVE way */
+#define RTMP_LF_PUBLISH_RECORD 0x0080 /* publish in RECORD way */
+#define RTMP_LF_PUBLISH_APPEND 0x0100 /* publish in APPEND way */
+
 #define RTMP_PROTOCOL_UNDEFINED	-1
 #define RTMP_PROTOCOL_RTMP      0
 #define RTMP_PROTOCOL_RTMPE     RTMP_FEATURE_ENC
@@ -74,6 +84,7 @@ extern "C"
 #define RTMP_PACKET_TYPE_AUDIO 0x08
 #define RTMP_PACKET_TYPE_VIDEO 0x09
 #define RTMP_PACKET_TYPE_INFO  0x12
+#define RTMP_PACKET_TYPE_INVOKE  0x14
 
 #define RTMP_MAX_HEADER_SIZE 18
 
@@ -81,6 +92,7 @@ extern "C"
 #define RTMP_PACKET_SIZE_MEDIUM   1
 #define RTMP_PACKET_SIZE_SMALL    2
 #define RTMP_PACKET_SIZE_MINIMUM  3
+
 
   typedef struct RTMPChunk
   {
