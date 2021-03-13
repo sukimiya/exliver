@@ -1,0 +1,150 @@
+2021-03-13 16:38:35.544 16091-16123/io.e4x.exliver I/gralloc: gralloc_unregister_buffer hnd=0x6f66927600, share_fd=60, share_attr_fd=61, magic=51647890, format=1, internal_format=300000001, byte_stride=4096, flags=4, usage=0x20000b00, size=2529280, width=1024, height=600, internalWidth=1024, internalHeight=608, stride=1024, base=0x6f012fe000, cpu_read=0,cpu_write=0, attr_base=0xffffffffffffffff, yuv_info=0, fd=-1, buf_idx=0, offset=0, min_pgsz=4096, phyaddr=0
+2021-03-13 16:38:35.545 16091-16123/io.e4x.exliver I/gralloc: gralloc_unregister_buffer hnd=0x6f1073cc00, share_fd=62, share_attr_fd=63, magic=51647890, format=1, internal_format=300000001, byte_stride=4096, flags=4, usage=0x20000b00, size=2529280, width=1024, height=600, internalWidth=1024, internalHeight=608, stride=1024, base=0x6f01094000, cpu_read=0,cpu_write=0, attr_base=0xffffffffffffffff, yuv_info=0, fd=-1, buf_idx=0, offset=0, min_pgsz=4096, phyaddr=0
+2021-03-13 16:38:35.545 16091-16123/io.e4x.exliver I/gralloc: gralloc_unregister_buffer hnd=0x6f66bfd800, share_fd=64, share_attr_fd=65, magic=51647890, format=1, internal_format=300000001, byte_stride=4096, flags=4, usage=0x20000b00, size=2529280, width=1024, height=600, internalWidth=1024, internalHeight=608, stride=1024, base=0x6f00e2a000, cpu_read=0,cpu_write=0, attr_base=0xffffffffffffffff, yuv_info=0, fd=-1, buf_idx=0, offset=0, min_pgsz=4096, phyaddr=0
+2021-03-13 16:38:35.545 16091-16123/io.e4x.exliver W/libEGL: EGLNativeWindowType 0x6f6671f590 disconnect failed
+2021-03-13 16:38:36.759 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/16653 (fetch/transfer)
+2021-03-13 16:38:41.980 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/16911 (fetch/transfer)
+2021-03-13 16:38:43.359 16091-16091/io.e4x.exliver W/ActivityThread: handleWindowVisibility: no activity for token android.os.BinderProxy@c5357d7
+2021-03-13 16:38:43.443 16091-16091/io.e4x.exliver I/io.e4x.exliver: type=1400 audit(0.0:2858): avc: denied { read } for name="navi_name" dev="mmcblk0p44" ino=1556543 scontext=u:r:untrusted_app_27:s0:c113,c256,c512,c768 tcontext=u:object_r:tw_data_file:s0 tclass=file permissive=1
+2021-03-13 16:38:43.443 16091-16091/io.e4x.exliver I/io.e4x.exliver: type=1400 audit(0.0:2859): avc: denied { open } for path="/data/tw/navi_name" dev="mmcblk0p44" ino=1556543 scontext=u:r:untrusted_app_27:s0:c113,c256,c512,c768 tcontext=u:object_r:tw_data_file:s0 tclass=file permissive=1
+2021-03-13 16:38:43.443 16091-16091/io.e4x.exliver I/io.e4x.exliver: type=1400 audit(0.0:2860): avc: denied { getattr } for path="/data/tw/navi_name" dev="mmcblk0p44" ino=1556543 scontext=u:r:untrusted_app_27:s0:c113,c256,c512,c768 tcontext=u:object_r:tw_data_file:s0 tclass=file permissive=1
+2021-03-13 16:38:43.448 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->1 true isPip:false
+2021-03-13 16:38:43.448 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->3 false
+2021-03-13 16:38:43.448 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->3.1 com.autonavi.amapauto
+2021-03-13 16:38:43.448 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->3.2 com.android.systemui
+2021-03-13 16:38:43.448 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->3.3 com.android.systemui.media.MediaProjectionPermissionActivity
+2021-03-13 16:38:43.448 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->fromPackageName:io.e4x.exliver
+2021-03-13 16:38:43.448 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->fromPackageClassName:io.e4x.exliver.app.App
+2021-03-13 16:38:43.448 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->intent:Intent { cmp=com.android.systemui/.media.MediaProjectionPermissionActivity }
+2021-03-13 16:38:43.448 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->isSplitScreenMode:false
+2021-03-13 16:38:43.449 16091-16091/io.e4x.exliver E/Instrumentation: lxw Instrumentation->getDockedStackSide:-1
+2021-03-13 16:38:43.449 16091-16091/io.e4x.exliver D/Configuration: isNaviPipLauncher->isNaviPipLauncher 1 :
+2021-03-13 16:38:43.451 16091-16091/io.e4x.exliver D/Instrumentation: lxw Instrumentation->execStartActivity-> other-zero:0
+2021-03-13 16:38:43.451 16091-16091/io.e4x.exliver D/Instrumentation: lxw Instrumentation->execStartActivity-> other-zero:1
+2021-03-13 16:38:43.447 16091-16091/io.e4x.exliver I/io.e4x.exliver: type=1400 audit(0.0:2861): avc: denied { write } for name="property_service" dev="tmpfs" ino=10081 scontext=u:r:untrusted_app_27:s0:c113,c256,c512,c768 tcontext=u:object_r:property_socket:s0 tclass=sock_file permissive=1
+2021-03-13 16:38:43.451 16091-16091/io.e4x.exliver W/Instrumentation: lxw Instrumentation -> bindVideoOutputAppPackageName:com.google.android.youtube targetPackageName:com.android.systemui
+2021-03-13 16:38:43.462 16091-16091/io.e4x.exliver D/Instrumentation: lxw Instrumentation->execStartActivity-> result:0 isPip:false
+2021-03-13 16:38:43.576 16091-16123/io.e4x.exliver D/mali_winsys: EGLint new_window_surface(egl_winsys_display *, void *, EGLSurface, EGLConfig, egl_winsys_surface **, EGLBoolean) returns 0x3000
+2021-03-13 16:38:43.604 16091-16091/io.e4x.exliver D/SurfaceCallbackHelper: dispatchSurfaceRedrawNeededAsync, callbacks=[Landroid.view.SurfaceHolder$Callback;@85c1226, callbacks.length=0
+2021-03-13 16:38:43.609 16091-16091/io.e4x.exliver D/SurfaceCallbackHelper: dispatchSurfaceRedrawNeededAsync, callbacks=[Landroid.view.SurfaceHolder$Callback;@c1f7e67, callbacks.length=0
+2021-03-13 16:38:43.631 16091-16123/io.e4x.exliver I/gralloc: gralloc_register_buffer hnd=0x6f1073cc00, share_fd=64, share_attr_fd=65, magic=51647890, format=1, internal_format=300000001, byte_stride=4096, flags=4, usage=0x20000b00, size=2529280, width=1024, height=600, internalWidth=1024, internalHeight=608, stride=1024, base=0x6f67230000, cpu_read=0,cpu_write=0, attr_base=0xffffffffffffffff, yuv_info=0, fd=-1, buf_idx=0, offset=0, min_pgsz=4096, phyaddr=0
+2021-03-13 16:38:43.680 16091-16123/io.e4x.exliver I/gralloc: gralloc_register_buffer hnd=0x6f66927600, share_fd=76, share_attr_fd=108, magic=51647890, format=1, internal_format=300000001, byte_stride=4096, flags=4, usage=0x20000b00, size=2529280, width=1024, height=600, internalWidth=1024, internalHeight=608, stride=1024, base=0x6f66fc6000, cpu_read=0,cpu_write=0, attr_base=0xffffffffffffffff, yuv_info=0, fd=-1, buf_idx=0, offset=0, min_pgsz=4096, phyaddr=0
+2021-03-13 16:38:43.689 16091-16123/io.e4x.exliver I/gralloc: gralloc_register_buffer hnd=0x6f10aab400, share_fd=110, share_attr_fd=112, magic=51647890, format=1, internal_format=300000001, byte_stride=4096, flags=4, usage=0x20000b00, size=2529280, width=1024, height=600, internalWidth=1024, internalHeight=608, stride=1024, base=0x6f66d5c000, cpu_read=0,cpu_write=0, attr_base=0xffffffffffffffff, yuv_info=0, fd=-1, buf_idx=0, offset=0, min_pgsz=4096, phyaddr=0
+2021-03-13 16:38:43.968 16091-16697/io.e4x.exliver E/MainActivity: RTMPHelper onConntecting
+2021-03-13 16:38:43.969 16091-16697/io.e4x.exliver E/JNI_LOG: RTMP connect stream start, url: rtmp://81.69.31.51:1935/oflaDemo/mv1615624723967
+2021-03-13 16:38:43.996 16091-16697/io.e4x.exliver E/JNI_LOG: RTMP connect success, url: rtmp://81.69.31.51:1935/oflaDemo/mv1615624723967
+2021-03-13 16:38:44.038 16091-16697/io.e4x.exliver E/MainActivity: RTMPHelper onConntectSuccess
+2021-03-13 16:38:44.039 16091-16697/io.e4x.exliver D/MediaCodec: app porc_name:io.e4x.exliver mime:video/avc
+2021-03-13 16:38:44.043 16091-16699/io.e4x.exliver I/OMXClient: IOmx service obtained
+2021-03-13 16:38:44.053 16091-16699/io.e4x.exliver W/OMXUtils: do not know color format 0x7f000789 = 2130708361
+2021-03-13 16:38:44.054 16091-16699/io.e4x.exliver I/ACodec: setupAVCEncoderParameters with [profile: Baseline] [level: Level2]
+2021-03-13 16:38:44.055 16091-16699/io.e4x.exliver I/ACodec: [OMX.sprd.h264.encoder] cannot encode color aspects. Ignoring.
+2021-03-13 16:38:44.055 16091-16699/io.e4x.exliver I/ACodec: [OMX.sprd.h264.encoder] cannot encode HDR static metadata. Ignoring.
+2021-03-13 16:38:44.055 16091-16699/io.e4x.exliver I/ACodec: setupVideoEncoder succeeded
+2021-03-13 16:38:44.055 16091-16699/io.e4x.exliver W/OMXUtils: do not know color format 0x7f000789 = 2130708361
+2021-03-13 16:38:44.063 16091-16697/io.e4x.exliver D/MediaCodec: app porc_name:io.e4x.exliver mime:audio/mp4a-latm
+2021-03-13 16:38:44.068 16091-16702/io.e4x.exliver D/CCodec: allocate(c2.android.aac.encoder)
+2021-03-13 16:38:44.072 16091-16702/io.e4x.exliver I/CCodec: Created component [c2.android.aac.encoder]
+2021-03-13 16:38:44.073 16091-16702/io.e4x.exliver D/CCodecConfig: read media type: audio/mp4a-latm
+2021-03-13 16:38:44.075 16091-16702/io.e4x.exliver D/ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+2021-03-13 16:38:44.076 16091-16702/io.e4x.exliver D/ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+2021-03-13 16:38:44.080 16091-16702/io.e4x.exliver D/ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+2021-03-13 16:38:44.080 16091-16702/io.e4x.exliver D/ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+2021-03-13 16:38:44.080 16091-16702/io.e4x.exliver D/ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+2021-03-13 16:38:44.080 16091-16702/io.e4x.exliver D/ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+2021-03-13 16:38:44.081 16091-16702/io.e4x.exliver D/ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+2021-03-13 16:38:44.083 16091-16702/io.e4x.exliver I/CCodecConfig: query failed after returning 9 values (BAD_INDEX)
+2021-03-13 16:38:44.084 16091-16702/io.e4x.exliver D/CCodecConfig: c2 config is Dict {
+      c2::u32 coded.bitrate.value = 64000
+      c2::u32 coded.pl.level = 0
+      c2::u32 coded.pl.profile = 8192
+      c2::u32 coding.aac-sbr-mode.value = 3
+      c2::u32 input.buffers.max-size.value = 2048
+      c2::u32 input.delay.value = 0
+      string input.media-type.value = "audio/raw"
+      string output.media-type.value = "audio/mp4a-latm"
+      c2::u32 raw.channel-count.value = 1
+      c2::u32 raw.sample-rate.value = 44100
+    }
+2021-03-13 16:38:44.085 16091-16702/io.e4x.exliver D/CCodecConfig: no c2 equivalents for aac-profile
+2021-03-13 16:38:44.085 16091-16702/io.e4x.exliver D/CCodecConfig: no c2 equivalents for encoder
+2021-03-13 16:38:44.087 16091-16702/io.e4x.exliver D/CCodecConfig: c2 config is Dict {
+      c2::u32 coded.bitrate.value = 96000
+      c2::u32 coded.pl.level = 0
+      c2::u32 coded.pl.profile = 8192
+      c2::u32 coding.aac-sbr-mode.value = 3
+      c2::u32 input.buffers.max-size.value = 4096
+      c2::u32 input.delay.value = 0
+      string input.media-type.value = "audio/raw"
+      string output.media-type.value = "audio/mp4a-latm"
+      c2::u32 raw.channel-count.value = 2
+      c2::u32 raw.sample-rate.value = 44100
+    }
+2021-03-13 16:38:44.088 16091-16702/io.e4x.exliver W/Codec2Client: query -- param skipped: index = 1107298332.
+2021-03-13 16:38:44.088 16091-16702/io.e4x.exliver D/CCodec: setup formats input: AMessage(what = 0x00000000) = {
+      int32_t channel-count = 2
+      int32_t max-input-size = 40960
+      string mime = "audio/raw"
+      int32_t sample-rate = 44100
+    } and output: AMessage(what = 0x00000000) = {
+      int32_t bitrate = 96000
+      int32_t channel-count = 2
+      int32_t level = 0
+      int32_t max-bitrate = 96000
+      string mime = "audio/mp4a-latm"
+      int32_t profile = 2
+      int32_t sample-rate = 44100
+    }
+2021-03-13 16:38:44.096 16091-16697/io.e4x.exliver D/chenzhu: start zzzzSurface(name=null)/@0xa62ee75 Surface(name=null)/@0xa62ee75 true
+2021-03-13 16:38:44.101 16091-16697/io.e4x.exliver E/JNI_LOG: RTMP connect stream success, url: rtmp://81.69.31.51:1935/oflaDemo/mv1615624723967
+2021-03-13 16:38:44.102 16091-16702/io.e4x.exliver W/Codec2Client: query -- param skipped: index = 1342179345.
+2021-03-13 16:38:44.102 16091-16702/io.e4x.exliver W/Codec2Client: query -- param skipped: index = 2415921170.
+2021-03-13 16:38:44.103 16091-16707/io.e4x.exliver I/AudioRecord: start  mClientUid:10113 mClientPid:16091  mSessionId:105 app name:io.e4x.exliver
+2021-03-13 16:38:44.103 16091-16702/io.e4x.exliver D/CCodecBufferChannel: [c2.android.aac.encoder#852] Created input block pool with allocatorID 16 => poolID 18 - OK (0)
+2021-03-13 16:38:44.105 16091-16702/io.e4x.exliver I/CCodecBufferChannel: [c2.android.aac.encoder#852] Created output block pool with allocatorID 16 => poolID 30 - OK
+2021-03-13 16:38:44.105 16091-16702/io.e4x.exliver D/CCodecBufferChannel: [c2.android.aac.encoder#852] Configured output block pool ids 30 => OK
+2021-03-13 16:38:44.141 16091-16699/io.e4x.exliver D/ACodec: dataspace changed to 0x10c40000 (R:2(Limited), P:4(BT601_6_525), M:3(BT601_6), T:3(SMPTE170M)) (R:2(Limited), S:4(BT601_525), T:3(SMPTE_170M))
+2021-03-13 16:38:44.143 16091-16705/io.e4x.exliver E/chenzhu: sps: 00 00 00 01 67 42 c0 14 e9 03 c0 b6 40 2c 22 11 a8
+2021-03-13 16:38:44.143 16091-16705/io.e4x.exliver E/chenzhu: pps: 00 00 00 01 68 ce 3c 80
+2021-03-13 16:38:47.206 16091-16155/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/17168 (fetch/transfer)
+2021-03-13 16:38:49.345 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/253 (fetch/transfer)
+2021-03-13 16:38:52.362 16091-16155/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/17422 (fetch/transfer)
+2021-03-13 16:38:54.544 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/509 (fetch/transfer)
+2021-03-13 16:38:57.523 16091-16155/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/17676 (fetch/transfer)
+2021-03-13 16:38:59.680 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/761 (fetch/transfer)
+2021-03-13 16:39:02.673 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/17929 (fetch/transfer)
+2021-03-13 16:39:04.804 16091-16155/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/1014 (fetch/transfer)
+2021-03-13 16:39:07.830 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/18183 (fetch/transfer)
+2021-03-13 16:39:09.963 16091-16155/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/1268 (fetch/transfer)
+2021-03-13 16:39:13.029 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/18439 (fetch/transfer)
+2021-03-13 16:39:15.152 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/1523 (fetch/transfer)
+2021-03-13 16:39:18.226 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/18695 (fetch/transfer)
+2021-03-13 16:39:20.311 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/1777 (fetch/transfer)
+2021-03-13 16:39:23.343 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/18947 (fetch/transfer)
+2021-03-13 16:39:25.472 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/2031 (fetch/transfer)
+2021-03-13 16:39:28.543 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/19203 (fetch/transfer)
+2021-03-13 16:39:30.628 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/2285 (fetch/transfer)
+2021-03-13 16:39:33.744 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/19459 (fetch/transfer)
+2021-03-13 16:39:35.827 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/2541 (fetch/transfer)
+2021-03-13 16:39:38.958 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/19715 (fetch/transfer)
+2021-03-13 16:39:41.062 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/2799 (fetch/transfer)
+2021-03-13 16:39:44.113 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/19969 (fetch/transfer)
+2021-03-13 16:39:46.262 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/3055 (fetch/transfer)
+2021-03-13 16:39:49.273 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/20223 (fetch/transfer)
+2021-03-13 16:39:51.479 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/3311 (fetch/transfer)
+2021-03-13 16:39:54.468 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/20479 (fetch/transfer)
+2021-03-13 16:39:56.677 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/3567 (fetch/transfer)
+2021-03-13 16:39:59.668 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/20735 (fetch/transfer)
+2021-03-13 16:40:01.876 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/3823 (fetch/transfer)
+2021-03-13 16:40:04.906 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/20993 (fetch/transfer)
+2021-03-13 16:40:07.030 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/4077 (fetch/transfer)
+2021-03-13 16:40:10.101 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/21249 (fetch/transfer)
+2021-03-13 16:40:12.264 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/4335 (fetch/transfer)
+2021-03-13 16:40:15.276 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/21503 (fetch/transfer)
+2021-03-13 16:40:17.380 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/4587 (fetch/transfer)
+2021-03-13 16:40:20.433 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/21757 (fetch/transfer)
+2021-03-13 16:40:22.598 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/4843 (fetch/transfer)
+2021-03-13 16:40:25.630 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/22013 (fetch/transfer)
+2021-03-13 16:40:27.797 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/5099 (fetch/transfer)
+2021-03-13 16:40:30.827 16091-16158/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b377220 : 4(163840 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 8/22269 (fetch/transfer)
+2021-03-13 16:40:32.991 16091-16702/io.e4x.exliver D/BufferPoolAccessor: bufferpool2 0x6f6b348620 : 5(204800 size) total buffers - 4(163840 size) used buffers - 0/5 (recycle/alloc) - 4/5355 (fetch/transfer)

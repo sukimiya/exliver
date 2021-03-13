@@ -22,15 +22,13 @@ import live.rtmp.OnConntionListener
 import live.rtmp.RtmpHelper
 import live.rtmp.encoder.BasePushEncoder
 import live.rtmp.encoder.PushEncode
-import java.util.*
-import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.OnMediaInfoListener {
 
     private lateinit var pushEncode: PushEncode
     private var rtmpHelper: RtmpHelper? = null
-    private var livingURL = "rtmp://192.168.31.61:1935/oflaDemo/"
+    private var livingURL = "rtmp://81.69.31.51:1935/oflaDemo/"
     private lateinit var mMediaProjectionCallback: MediaProjectionCallback
     private var mProjectionManager: MediaProjectionManager? = null
     private var mScreenDensity: Int = 0
