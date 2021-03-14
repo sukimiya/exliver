@@ -9,6 +9,7 @@ import android.content.ServiceConnection
 import android.graphics.Rect
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.IBinder
@@ -19,6 +20,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import android.widget.ToggleButton
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.tbruyelle.rxpermissions2.RxPermissions
 import io.e4x.exliver.vo.RecordVO
@@ -47,8 +49,11 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
     private var liveUrl:String = ""
 
     private var serviceConnection = object :ServiceConnection{
+        @RequiresApi(Build.VERSION_CODES.Q)
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             recordService = (service as RecordService.MsgBinder)?.getService()
+            createLiver()
+            startLiving()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -80,10 +85,13 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
                     putExtra(RecordService.SCREEN_SIZE_WIDTH, 1280)
                     putExtra(RecordService.SCREEN_SIZE_HEIGHT, 720)
                 }
-                startService(intent)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(intent)
+                } else {
+                    startService(intent)
+                }
                 bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
                 btnRecorder.setOnClickListener { v -> onToggleScreenRecord(v) }
-//                createLiver()
             } else {
                 Toast.makeText(this, "请设置权限", Toast.LENGTH_LONG).show()
             }
@@ -95,19 +103,24 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
             REQUEST_SCREEN_RECORDER -> {
                 data?.let {
                     try {
-                        mMediaProjection =
-                            mProjectionManager!!.getMediaProjection(resultCode, data!!)
-                        mMediaProjection!!.registerCallback(mMediaProjectionCallback, null)
-                        rtmpHelper = RtmpHelper()
-                        rtmpHelper?.setOnConntionListener(this)
+//                        mMediaProjection =
+//                            mProjectionManager!!.getMediaProjection(resultCode, data!!)
+//                        mMediaProjection!!.registerCallback(mMediaProjectionCallback, null)
+//                        rtmpHelper = RtmpHelper()
+//                        rtmpHelper?.setOnConntionListener(this)
 
-                        var time = System.currentTimeMillis().toString()
-                        var recordName = "mv" + System.currentTimeMillis().toString()
-                        var newRecord = RecordVO(time, recordName)
-                        var liveUrl = livingURL + recordName
-                        listRecord.add(newRecord)
-                        rtmpHelper?.initLivePush(liveUrl)
-
+//                        var time = System.currentTimeMillis().toString()
+//                        var recordName = "mv" + System.currentTimeMillis().toString()
+//                        var newRecord = RecordVO(time, recordName)
+//                        var liveUrl = livingURL + recordName
+//                        listRecord.add(newRecord)
+//                        rtmpHelper?.initLivePush(liveUrl)
+                        var metrics = DisplayMetrics()
+                        windowManager.defaultDisplay.getRealMetrics(metrics)
+                        recordService.initService(data, metrics)
+                        recordService.perparRecording(getFilePath())
+                        recordService.start()
+                        btnRecorder.isChecked = true
                     } catch(e: Exception) {
                         e.printStackTrace()
                     }
@@ -149,18 +162,18 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
         return outputPath + File.separator + "mv" + time + ".mp4"
     }
     fun createLiver() {
-        if (mScreenDensity == 0) {
-            val metrics = DisplayMetrics()
-            windowManager.defaultDisplay.getMetrics(metrics)
-            mScreenDensity = metrics.densityDpi
-        }
-
-        mProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager?
-
+        perparMedia()
         btnRecorder.setOnClickListener { v -> onToggleScreenShare(v) }
-        mMediaProjectionCallback = MediaProjectionCallback()
-
         btnRecorder.isChecked = true
+    }
+    fun perparMedia() {
+//        if (mScreenDensity == 0) {
+//            val metrics = DisplayMetrics()
+//            windowManager.defaultDisplay.getMetrics(metrics)
+//            mScreenDensity = metrics.densityDpi
+//        }
+        mProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager?
+//        mMediaProjectionCallback = MediaProjectionCallback()
     }
     private fun onToggleScreenShare(v: View?) {
         if ((v as ToggleButton).isChecked) {
@@ -172,9 +185,10 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
     }
     private fun onToggleScreenRecord(v: View?) {
         if ((v as ToggleButton).isChecked) {
-            recordService.start(getFilePath())
-        } else {
             recordService.stop()
+        } else {
+            recordService.perparRecording(getFilePath())
+            recordService.start()
         }
     }
     private fun startLiving() {
