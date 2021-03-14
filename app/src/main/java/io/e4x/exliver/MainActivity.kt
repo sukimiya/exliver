@@ -2,12 +2,16 @@ package io.e4x.exliver
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.Rect
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
+import android.os.Environment
+import android.os.IBinder
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Menu
@@ -22,6 +26,8 @@ import live.rtmp.OnConntionListener
 import live.rtmp.RtmpHelper
 import live.rtmp.encoder.BasePushEncoder
 import live.rtmp.encoder.PushEncode
+import java.io.File
+import java.io.IOException
 
 
 class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.OnMediaInfoListener {
@@ -29,6 +35,8 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
     private lateinit var pushEncode: PushEncode
     private var rtmpHelper: RtmpHelper? = null
     private var livingURL = "rtmp://81.69.31.51:1935/oflaDemo/"
+    private lateinit var msgBinder: RecordService.MsgBinder
+    private lateinit var recordService: RecordService
     private lateinit var mMediaProjectionCallback: MediaProjectionCallback
     private var mProjectionManager: MediaProjectionManager? = null
     private var mScreenDensity: Int = 0
@@ -37,6 +45,18 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
     private lateinit var btnRecorder: ToggleButton
     private var listRecord: MutableList<RecordVO> = ArrayList()
     private var liveUrl:String = ""
+
+    private var serviceConnection = object :ServiceConnection{
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            recordService = (service as RecordService.MsgBinder)?.getService()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            TODO("Not yet implemented")
+        }
+
+    }
+
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +75,15 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
             Manifest.permission.CAMERA
         ).subscribe {
             if (it) {
-                createLiver()
+                var intent = Intent(this, RecordService::class.java).apply {
+                    action = RecordService.ACTION_INIT
+                    putExtra(RecordService.SCREEN_SIZE_WIDTH, 1280)
+                    putExtra(RecordService.SCREEN_SIZE_HEIGHT, 720)
+                }
+                startService(intent)
+                bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+                btnRecorder.setOnClickListener { v -> onToggleScreenRecord(v) }
+//                createLiver()
             } else {
                 Toast.makeText(this, "请设置权限", Toast.LENGTH_LONG).show()
             }
@@ -109,6 +137,17 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
             mMediaProjection = null
         }
     }
+    fun getFilePath():String{
+        var outputPath = getExternalFilesDir(Environment.DIRECTORY_DCIM)?.absolutePath + File.separator + STORAGE_FOLDER_NAME
+        var folder = File(outputPath)
+        if(!folder.exists()) {
+            if(!folder.mkdir()){
+                throw IOException("folder can't be create")
+            }
+        }
+        var time = System.currentTimeMillis().toString()
+        return outputPath + File.separator + "mv" + time + ".mp4"
+    }
     fun createLiver() {
         if (mScreenDensity == 0) {
             val metrics = DisplayMetrics()
@@ -121,33 +160,39 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
         btnRecorder.setOnClickListener { v -> onToggleScreenShare(v) }
         mMediaProjectionCallback = MediaProjectionCallback()
 
-        if (mMediaProjection == null) {
-            startActivityForResult(
-                mProjectionManager!!.createScreenCaptureIntent(),
-                REQUEST_SCREEN_RECORDER
-            )
-            return
-        }
         btnRecorder.isChecked = true
     }
-
     private fun onToggleScreenShare(v: View?) {
         if ((v as ToggleButton).isChecked) {
-            if (mMediaProjection == null) {
-                startActivityForResult(
-                    mProjectionManager!!.createScreenCaptureIntent(),
-                    REQUEST_SCREEN_RECORDER
-                )
-            }
-            Log.v(TAG, "living start : " + liveUrl)
+            startLiving()
         } else {
             // stop living
-            rtmpHelper?.stop()
-            mMediaProjection?.stop()
-            rtmpHelper = null
-            mMediaProjection = null
-            Log.v(TAG, "living Stopped")
+            stopLiving()
         }
+    }
+    private fun onToggleScreenRecord(v: View?) {
+        if ((v as ToggleButton).isChecked) {
+            recordService.start(getFilePath())
+        } else {
+            recordService.stop()
+        }
+    }
+    private fun startLiving() {
+        if (mMediaProjection == null) {
+            startActivityForResult(
+                    mProjectionManager!!.createScreenCaptureIntent(),
+                    REQUEST_SCREEN_RECORDER
+            )
+        }
+        Log.v(TAG, "living start : " + liveUrl)
+    }
+    private fun stopLiving() {
+        // stop living
+        rtmpHelper?.stop()
+        mMediaProjection?.stop()
+        rtmpHelper = null
+        mMediaProjection = null
+        Log.v(TAG, "living Stopped")
     }
     private inner class MediaProjectionCallback : MediaProjection.Callback() {
         override fun onStop() {

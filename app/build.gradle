@@ -5,14 +5,14 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: "androidx.navigation.safeargs"
 
 android {
-    signingConfigs {
-        keystore {
-            storeFile file('/Users/lily/AndroidStudioProjects/exliver/keystore')
-            storePassword '19547047'
-            keyAlias 'key0'
-            keyPassword '19547047'
-        }
-    }
+//    signingConfigs {
+//        keystore {
+//            storeFile file('/Users/lily/AndroidStudioProjects/exliver/keystore')
+//            storePassword '19547047'
+//            keyAlias 'key0'
+//            keyPassword '19547047'
+//        }
+//    }
     compileSdkVersion 29
     buildToolsVersion '29.0.2'
 
