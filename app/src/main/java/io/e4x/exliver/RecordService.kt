@@ -1,5 +1,6 @@
 package io.e4x.exliver
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
@@ -19,7 +20,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.android.camera.utils.SmartSize
 import io.e4x.exliver.utils.Bitrate
+import io.e4x.exliver.utils.FileUtil
 import java.io.IOException
+import java.util.*
 
 
 // TODO: Rename actions, choose action names that describe tasks that this
@@ -42,11 +45,12 @@ private const val EXTRA_PARAM2 = "io.e4x.exliver.extra.PARAM2"
 class RecordService : Service() {
 
     private val NOTIFICATION_ID = 1770
-
-    private lateinit var mediaProjectionCallback: MediaProjectionCallback
+    private lateinit var fileUtil: FileUtil
     private lateinit var projectionManager: MediaProjectionManager
     private lateinit var mediaProjection: MediaProjection
     private lateinit var mediaRecorder: MediaRecorder
+    private var timer: Timer = Timer()
+    private var timerOn: Boolean = false
     private var displayMetrics: DisplayMetrics? = null
     private var screenSize: Size? = null
     private var isInitialized = false
@@ -55,7 +59,7 @@ class RecordService : Service() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate() {
         super.onCreate()
-
+        fileUtil = FileUtil(this)
         // 获取服务通知
 
         // 获取服务通知
@@ -74,13 +78,13 @@ class RecordService : Service() {
 //                val mediaPermission = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
 //                initService(intent)
             }
-            ACTION_START -> {
-                var path = intent?.getStringExtra(RECORD_PATH)
-                if (path != null) {
-                    perparRecording(path)
-                    start()
-                }
-            }
+//            ACTION_START -> {
+//                var path = intent?.getStringExtra(RECORD_PATH)
+//                if (path != null) {
+//                    perparRecording(path)
+//                    start()
+//                }
+//            }
             ACTION_STOP -> {
                 if (isInitialized) {
                     stop()
@@ -108,9 +112,14 @@ class RecordService : Service() {
     fun initService(mediaPermission: Intent, metrics: DisplayMetrics) {
         displayMetrics = metrics
         projectionManager = (getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager?)!!
-        mediaProjectionCallback = MediaProjectionCallback()
         mediaProjection = projectionManager.getMediaProjection(Activity.RESULT_OK, mediaPermission!!)
-        mediaProjection.registerCallback(mediaProjectionCallback, null)
+        mediaProjection.registerCallback(object : MediaProjection.Callback() {
+                @SuppressLint("LongLogTag")
+                override fun onStop() {
+                    Log.d("MediaProjection:Callback", "onStop")
+                    super.onStop()
+                }
+            }, null)
         initRecorder(metrics)
     }
     fun perparRecording(path: String) {
@@ -199,15 +208,39 @@ class RecordService : Service() {
     }
     private var currentFilePath = ""
     fun start() {
+        if (timerOn) {
+            stop()
+            timerOn = false
+        }
         if(virtualDisplay == null) virtualDisplay = createVirtualDisplay(displayMetrics!!)
         mediaRecorder.start()
+        timer = Timer()
+        timer.schedule(object : TimerTask(){
+            override fun run() {
+                timer.cancel()
+                stop()
+                resume()
+            }
+        }, RECORDING_DURATION)
+        isStoped = false
+        timerOn = true
         Log.d(TAG, "start record with file: $currentFilePath")
     }
+    private var isStoped = true
     fun stop() {
-        mediaRecorder.stop()
-        Log.d(TAG, "stop record with file: $currentFilePath")
+        if (!isStoped) {
+            mediaRecorder.stop()
+            mediaRecorder.release()
+            isStoped = true
+            Log.d(TAG, "stop record with file: $currentFilePath")
+        }
     }
-
+    fun resume() {
+        initRecorder(displayMetrics!!)
+        currentFilePath = fileUtil.getMVFilePath()
+        perparRecording(currentFilePath)
+        start()
+    }
     companion object {
         const val TAG = "RecordService"
 
@@ -219,6 +252,7 @@ class RecordService : Service() {
         const val RECORD_PATH = "io.e4x.exliver.extra.RECORD_PATH"
 
         private const val REQUEST_SCREEN_RECORDER = 1
+        private const val RECORDING_DURATION = 10L * 1000L
 
     }
     private inner class MediaProjectionCallback : MediaProjection.Callback() {

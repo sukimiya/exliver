@@ -262,6 +262,7 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
         private const val REQUEST_SCREEN_RECORDER = 1
         private val STORAGE_FOLDER_NAME = "records"
         private val TAG = MainActivity::class.java.simpleName
+
     }
 
 }
