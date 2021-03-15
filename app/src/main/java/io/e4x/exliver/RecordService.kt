@@ -19,8 +19,12 @@ import android.util.Size
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.android.camera.utils.SmartSize
+import io.e4x.exliver.controllers.RecordFileReader
+import io.e4x.exliver.controllers.RecordUploader
 import io.e4x.exliver.utils.Bitrate
 import io.e4x.exliver.utils.FileUtil
+import io.e4x.exliver.vo.RecordVO
+import java.io.File
 import java.io.IOException
 import java.util.*
 
@@ -46,6 +50,8 @@ class RecordService : Service() {
 
     private val NOTIFICATION_ID = 1770
     private lateinit var fileUtil: FileUtil
+    private lateinit var recordFileReader: RecordFileReader
+    private lateinit var recordUploader: RecordUploader
     private lateinit var projectionManager: MediaProjectionManager
     private lateinit var mediaProjection: MediaProjection
     private lateinit var mediaRecorder: MediaRecorder
@@ -60,6 +66,8 @@ class RecordService : Service() {
     override fun onCreate() {
         super.onCreate()
         fileUtil = FileUtil(this)
+        recordFileReader = RecordFileReader(this)
+        recordUploader = RecordUploader()
         // 获取服务通知
 
         // 获取服务通知
@@ -206,18 +214,32 @@ class RecordService : Service() {
         )
         return virtualDisplay!!
     }
+    private fun uploadRecord() {
+        var filepath = currentFilePath.split(File.separator)
+        var filename = filepath.get(filepath.size-1)
+        var time = filename.substring(2, filename.lastIndex - 3)
+        var recordvo = RecordVO(time, currentFilePath)
+        recordFileReader.add(recordvo)
+        recordFileReader.removeOld()
+        // upload to server
+        recordUploader.upload(recordvo)
+    }
     private var currentFilePath = ""
     fun start() {
         if (timerOn) {
             stop()
             timerOn = false
         }
-        if(virtualDisplay == null) virtualDisplay = createVirtualDisplay(displayMetrics!!)
+        if(virtualDisplay == null)
+            virtualDisplay = createVirtualDisplay(displayMetrics!!)
+        else
+            virtualDisplay!!.surface = mediaRecorder.surface
         mediaRecorder.start()
         timer = Timer()
         timer.schedule(object : TimerTask(){
             override fun run() {
                 timer.cancel()
+                timerOn = false
                 stop()
                 resume()
             }
@@ -228,10 +250,19 @@ class RecordService : Service() {
     }
     private var isStoped = true
     fun stop() {
+        if (timerOn) {
+            timer.cancel()
+            timerOn = false
+        }
         if (!isStoped) {
+            mediaRecorder.setOnErrorListener(null)
+            mediaRecorder.setOnInfoListener(null)
+            mediaRecorder.setPreviewDisplay(null)
             mediaRecorder.stop()
+            mediaRecorder.reset()
             mediaRecorder.release()
             isStoped = true
+            uploadRecord()
             Log.d(TAG, "stop record with file: $currentFilePath")
         }
     }
@@ -252,7 +283,8 @@ class RecordService : Service() {
         const val RECORD_PATH = "io.e4x.exliver.extra.RECORD_PATH"
 
         private const val REQUEST_SCREEN_RECORDER = 1
-        private const val RECORDING_DURATION = 10L * 1000L
+        // record 360s
+        private const val RECORDING_DURATION = 360L * 1000L
 
     }
     private inner class MediaProjectionCallback : MediaProjection.Callback() {

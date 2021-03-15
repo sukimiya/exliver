@@ -18,6 +18,11 @@ class FileUtil(contextWrapper: ContextWrapper) {
         var time = System.currentTimeMillis().toString()
         return outputPath + File.separator + "mv" + time + ".mp4"
     }
+    fun getFileList(): Array<File>? {
+        var filePath = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_DCIM)?.absolutePath + File.separator + STORAGE_FOLDER_NAME
+        var folder = File(filePath)
+        return folder.listFiles()
+    }
 
     companion object {
         const val STORAGE_FOLDER_NAME = "records"
