@@ -23,8 +23,10 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:networkSecurityConfig="@xml/network_permissions"
         android:theme="@style/Theme.Exliver"
-        tools:ignore="HardcodedDebugMode">
+        tools:ignore="HardcodedDebugMode"
+        tools:targetApi="m">
         <activity android:name=".RecordForgroundServiceActivity"></activity>
         <activity android:name=".NotificationActivity" />
 

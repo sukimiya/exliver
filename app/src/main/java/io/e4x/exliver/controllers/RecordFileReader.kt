@@ -2,6 +2,8 @@ package io.e4x.exliver.controllers
 
 import android.content.ContextWrapper
 import android.util.Log
+import io.e4x.exliver.net.NetworkException
+import io.e4x.exliver.net.UploadServices
 import io.e4x.exliver.utils.FileUtil
 import io.e4x.exliver.vo.RecordVO
 import java.io.File
@@ -11,6 +13,7 @@ import java.util.*
 class RecordFileReader(contextWrapper: ContextWrapper) {
     private var contextWrapper = contextWrapper
     private var fileUtil = FileUtil(contextWrapper)
+    private var uploadServices: UploadServices = UploadServices.getInstance()
     var recordList: MutableList<RecordVO> = mutableListOf()
     init {
         onStart()
@@ -27,6 +30,12 @@ class RecordFileReader(contextWrapper: ContextWrapper) {
             }
         }
         Log.d(TAG, "onStart")
+        try {
+            if(recordList.size > 0)
+                uploadServices.setList(recordList)
+        } catch(e: NetworkException) {
+            e.printStackTrace()
+        }
     }
 
     private fun checkOldFiles(mvlist: Array<File>?) {
@@ -43,6 +52,11 @@ class RecordFileReader(contextWrapper: ContextWrapper) {
 //        }
     }
     fun add(recordVO: RecordVO):Boolean {
+        try {
+            uploadServices.add(recordVO)
+        } catch (e: NetworkException) {
+            e.printStackTrace()
+        }
         return recordList.add(recordVO)
     }
     fun removeOld(){
