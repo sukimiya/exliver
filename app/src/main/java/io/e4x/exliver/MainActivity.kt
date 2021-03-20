@@ -2,22 +2,15 @@ package io.e4x.exliver
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.graphics.Rect
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
-import android.os.Build
-import android.os.Bundle
-import android.os.Environment
-import android.os.IBinder
+import android.os.*
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
+import android.widget.TextView
 import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.annotation.RequiresApi
@@ -30,6 +23,8 @@ import live.rtmp.encoder.BasePushEncoder
 import live.rtmp.encoder.PushEncode
 import java.io.File
 import java.io.IOException
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.OnMediaInfoListener {
@@ -47,7 +42,7 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
     private lateinit var btnRecorder: ToggleButton
     private var listRecord: MutableList<RecordVO> = ArrayList()
     private var liveUrl:String = ""
-
+    private lateinit var playtimerTextView: TextView
     private var serviceConnection = object :ServiceConnection{
         @RequiresApi(Build.VERSION_CODES.Q)
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -66,10 +61,12 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.toolbar))
+//        setSupportActionBar(findViewById(R.id.toolbar))
+        playtimerTextView = findViewById(R.id.playTimer)
         recordBounds = Rect()
         windowManager.getDefaultDisplay().getRectSize(recordBounds);
         btnRecorder = findViewById<ToggleButton>(R.id.fab)
+        theContext = this
         // Build ScreenRecorder
         val rxPermissions = RxPermissions(this)
         rxPermissions.request(
@@ -120,6 +117,14 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
                         recordService.initService(data, metrics)
                         recordService.perparRecording(getFilePath())
                         recordService.start()
+                        Timer().scheduleAtFixedRate(object:TimerTask(){
+                            override fun run() {
+                                theContext?.runOnUiThread {
+                                    updateTimerText()
+                                }
+                            }
+
+                        }, 0L, 300L)
                         btnRecorder.isChecked = true
                     } catch(e: Exception) {
                         e.printStackTrace()
@@ -256,13 +261,15 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
         if (rtmpHelper == null) return
         rtmpHelper?.pushAudioData(data)
     }
-
+    private fun updateTimerText(){
+        playtimerTextView.text = System.currentTimeMillis().toString()
+    }
     companion object{
         private const val RECORD_LIST_SIZE = 30
         private const val REQUEST_SCREEN_RECORDER = 1
         private val STORAGE_FOLDER_NAME = "records"
         private val TAG = MainActivity::class.java.simpleName
-
+        var theContext: MainActivity? = null
     }
 
 }

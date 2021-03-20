@@ -16,14 +16,21 @@ import android.os.IBinder
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.android.camera.utils.SmartSize
 import io.e4x.exliver.controllers.RecordFileReader
 import io.e4x.exliver.controllers.RecordUploader
+import io.e4x.exliver.net.UploadServices
+import io.e4x.exliver.net.rx
 import io.e4x.exliver.utils.Bitrate
 import io.e4x.exliver.utils.FileUtil
 import io.e4x.exliver.vo.RecordVO
+import live.rtmp.OnConntionListener
+import live.rtmp.RtmpHelper
+import live.rtmp.encoder.BasePushEncoder
+import live.rtmp.encoder.PushEncode
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -54,14 +61,16 @@ class RecordService : Service() {
     private lateinit var recordUploader: RecordUploader
     private lateinit var projectionManager: MediaProjectionManager
     private lateinit var mediaProjection: MediaProjection
-    private lateinit var mediaRecorder: MediaRecorder
+    private var mediaRecorder: MediaRecorder? = null
     private var timer: Timer = Timer()
     private var timerOn: Boolean = false
     private var displayMetrics: DisplayMetrics? = null
     private var screenSize: Size? = null
     private var isInitialized = false
     private var virtualDisplay: VirtualDisplay? = null
-
+    private lateinit var upstreamUrl:String
+    private lateinit var pushEncode: PushEncode
+    @SuppressLint("CheckResult")
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate() {
         super.onCreate()
@@ -75,6 +84,43 @@ class RecordService : Service() {
         //将服务置于启动状态 ,NOTIFICATION_ID指的是创建的通知的ID
         //将服务置于启动状态 ,NOTIFICATION_ID指的是创建的通知的ID
         startForeground(NOTIFICATION_ID, notification)
+    }
+    private lateinit var rtmpHelper:RtmpHelper
+    private fun createLive() {
+        rtmpHelper = RtmpHelper()
+        rtmpHelper.setOnConntionListener(object: OnConntionListener{
+            override fun onConntecting() {
+
+            }
+
+            override fun onConntectSuccess() {
+                pushEncode = PushEncode(MainActivity.theContext)
+                pushEncode.initEncoder(true, mediaProjection, screenSize?.width!!, screenSize?.height!!, 44100, 2, 16)
+                pushEncode.setOnMediaInfoListener(object: BasePushEncoder.OnMediaInfoListener {
+                    override fun onMediaTime(times: Int) { }
+
+                    override fun onSPSPPSInfo(sps: ByteArray?, pps: ByteArray?) {
+                        rtmpHelper.pushSPSPPS(sps, pps)
+                    }
+
+                    override fun onVideoDataInfo(data: ByteArray?, keyFrame: Boolean) {
+                        rtmpHelper.pushVideoData(data,keyFrame)
+                    }
+
+                    override fun onAudioInfo(data: ByteArray?) {
+                        rtmpHelper.pushAudioData(data)
+                    }
+
+                })
+                pushEncode.start()
+            }
+
+            override fun onConntectFail(msg: String?) {
+                Log.d(TAG, "onConntectFail:" + msg)
+            }
+
+        })
+        rtmpHelper.initLivePush(upstreamUrl)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -117,6 +163,7 @@ class RecordService : Service() {
             return mService
         }
     }
+    @SuppressLint("CheckResult")
     fun initService(mediaPermission: Intent, metrics: DisplayMetrics) {
         displayMetrics = metrics
         projectionManager = (getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager?)!!
@@ -129,28 +176,34 @@ class RecordService : Service() {
                 }
             }, null)
         initRecorder(metrics)
+        UploadServices.getInstance().getPushUrl().rx().subscribe(){
+            upstreamUrl = it.resault
+            createLive()
+        }
     }
     fun perparRecording(path: String) {
         currentFilePath = path
-        mediaRecorder.setOutputFile(currentFilePath)
-        try {
-            mediaRecorder.prepare()
-        } catch (e: IOException) {
-            Log.e(TAG, "prepare() failed")
+        if (mediaRecorder != null) {
+            mediaRecorder?.setOutputFile(currentFilePath)
+            try {
+                mediaRecorder?.prepare()
+            } catch (e: IOException) {
+                Log.e(TAG, "prepare() failed")
+            }
         }
     }
     private fun initRecorder(metrics: DisplayMetrics) {
         mediaRecorder = MediaRecorder()
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE)
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+        mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+        mediaRecorder?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
+        mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
         // H265
-        mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.HEVC)
-        mediaRecorder.setVideoEncodingBitRate(Bitrate.videoBitRate(screenSize!!.width, screenSize!!.height))
-        mediaRecorder.setVideoFrameRate(25)
-        mediaRecorder.setVideoSize(screenSize!!.width, screenSize!!.height)
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-        mediaRecorder.setAudioSamplingRate(44100)
+        mediaRecorder?.setVideoEncoder(MediaRecorder.VideoEncoder.HEVC)
+        mediaRecorder?.setVideoEncodingBitRate(Bitrate.videoBitRate(screenSize!!.width, screenSize!!.height))
+        mediaRecorder?.setVideoFrameRate(25)
+        mediaRecorder?.setVideoSize(screenSize!!.width, screenSize!!.height)
+        mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+        mediaRecorder?.setAudioSamplingRate(44100)
     }
     /**
      * 创建服务通知
@@ -210,7 +263,7 @@ class RecordService : Service() {
             TAG, metrics.widthPixels,
             metrics.heightPixels, metrics.densityDpi,
             DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            mediaRecorder.surface, null, null
+            mediaRecorder?.surface, null, null
         )
         return virtualDisplay!!
     }
@@ -230,23 +283,25 @@ class RecordService : Service() {
             stop()
             timerOn = false
         }
-        if(virtualDisplay == null)
-            virtualDisplay = createVirtualDisplay(displayMetrics!!)
-        else
-            virtualDisplay!!.surface = mediaRecorder.surface
-        mediaRecorder.start()
-        timer = Timer()
-        timer.schedule(object : TimerTask(){
-            override fun run() {
-                timer.cancel()
-                timerOn = false
-                stop()
-                resume()
-            }
-        }, RECORDING_DURATION)
-        isStoped = false
-        timerOn = true
-        Log.d(TAG, "start record with file: $currentFilePath")
+        if (mediaRecorder!=null) {
+            if(virtualDisplay == null)
+                virtualDisplay = createVirtualDisplay(displayMetrics!!)
+            else
+                virtualDisplay!!.surface = mediaRecorder?.surface
+            mediaRecorder?.start()
+            timer = Timer()
+            timer.schedule(object : TimerTask() {
+                override fun run() {
+                    timer.cancel()
+                    timerOn = false
+                    stop()
+                    resume()
+                }
+            }, RECORDING_DURATION)
+            isStoped = false
+            timerOn = true
+            Log.d(TAG, "start record with file: $currentFilePath")
+        }
     }
     private var isStoped = true
     fun stop() {
@@ -255,12 +310,12 @@ class RecordService : Service() {
             timerOn = false
         }
         if (!isStoped) {
-            mediaRecorder.setOnErrorListener(null)
-            mediaRecorder.setOnInfoListener(null)
-            mediaRecorder.setPreviewDisplay(null)
-            mediaRecorder.stop()
-            mediaRecorder.reset()
-            mediaRecorder.release()
+            mediaRecorder?.setOnErrorListener(null)
+            mediaRecorder?.setOnInfoListener(null)
+            mediaRecorder?.setPreviewDisplay(null)
+            mediaRecorder?.stop()
+            mediaRecorder?.reset()
+            mediaRecorder?.release()
             isStoped = true
             uploadRecord()
             Log.d(TAG, "stop record with file: $currentFilePath")
@@ -272,6 +327,7 @@ class RecordService : Service() {
         perparRecording(currentFilePath)
         start()
     }
+
     companion object {
         const val TAG = "RecordService"
 
