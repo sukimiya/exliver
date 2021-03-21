@@ -1,5 +1,6 @@
 package io.e4x.exliver.net
 
+import io.e4x.exliver.net.entities.RequestAdd
 import io.e4x.exliver.net.entities.RequestUploadFileList
 import io.e4x.exliver.net.entities.UploadFileListEvent
 import io.e4x.exliver.net.entities.UploadQueryEvent
@@ -12,18 +13,18 @@ import retrofit2.http.*
 
 interface IUploadServices {
     @POST("up/add")
-    fun add(@Body recordVO: RecordVO): Call<UploadResault>
+    fun add(@Body requestAdd: RequestAdd): Call<UploadResault>
     @POST("up/list")
     fun list(@Body requestUploadFileList: RequestUploadFileList): Call<UploadResault>
     @GET("up/getList")
-    fun getList(): Call<UploadFileListEvent>
+    fun getList(@Query("deviceId") deviceId:String): Call<UploadFileListEvent>
     @GET("up/getPushURL")
-    fun getPushUrl(@Query("host") host:String): Call<UploadQueryEvent>
+    fun getPushUrl(@Query("host") host:String, @Query("deviceId") deviceId:String): Call<UploadQueryEvent>
 
     @Multipart
     @POST("up/uploadFile")
-    fun upload(@Part file: MultipartBody.Part?): Call<UploadResault>
-    @GET("up/uplate")
-    fun update (): Call<UploadUpdateEvent>
+    fun upload(@Part file: MultipartBody.Part?, @Query("deviceId") deviceId:String): Call<UploadResault>
+    @GET("up/update")
+    fun update (@Query("deviceId") deviceId:String): Call<UploadUpdateEvent>
 
 }

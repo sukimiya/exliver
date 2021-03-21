@@ -25,6 +25,7 @@ import io.e4x.exliver.controllers.RecordUploader
 import io.e4x.exliver.net.UploadServices
 import io.e4x.exliver.net.rx
 import io.e4x.exliver.utils.Bitrate
+import io.e4x.exliver.utils.DeviceHelper
 import io.e4x.exliver.utils.FileUtil
 import io.e4x.exliver.vo.RecordVO
 import live.rtmp.OnConntionListener
@@ -70,6 +71,7 @@ class RecordService : Service() {
     private var virtualDisplay: VirtualDisplay? = null
     private lateinit var upstreamUrl:String
     private lateinit var pushEncode: PushEncode
+
     @SuppressLint("CheckResult")
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate() {
@@ -86,42 +88,7 @@ class RecordService : Service() {
         startForeground(NOTIFICATION_ID, notification)
     }
     private lateinit var rtmpHelper:RtmpHelper
-    private fun createLive() {
-        rtmpHelper = RtmpHelper()
-        rtmpHelper.setOnConntionListener(object: OnConntionListener{
-            override fun onConntecting() {
-
-            }
-
-            override fun onConntectSuccess() {
-                pushEncode = PushEncode(MainActivity.theContext)
-                pushEncode.initEncoder(true, mediaProjection, screenSize?.width!!, screenSize?.height!!, 44100, 2, 16)
-                pushEncode.setOnMediaInfoListener(object: BasePushEncoder.OnMediaInfoListener {
-                    override fun onMediaTime(times: Int) { }
-
-                    override fun onSPSPPSInfo(sps: ByteArray?, pps: ByteArray?) {
-                        rtmpHelper.pushSPSPPS(sps, pps)
-                    }
-
-                    override fun onVideoDataInfo(data: ByteArray?, keyFrame: Boolean) {
-                        rtmpHelper.pushVideoData(data,keyFrame)
-                    }
-
-                    override fun onAudioInfo(data: ByteArray?) {
-                        rtmpHelper.pushAudioData(data)
-                    }
-
-                })
-                pushEncode.start()
-            }
-
-            override fun onConntectFail(msg: String?) {
-                Log.d(TAG, "onConntectFail:" + msg)
-            }
-
-        })
-        rtmpHelper.initLivePush(upstreamUrl)
-    }
+    private var tempFrame:Boolean = false
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
@@ -169,17 +136,53 @@ class RecordService : Service() {
         projectionManager = (getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager?)!!
         mediaProjection = projectionManager.getMediaProjection(Activity.RESULT_OK, mediaPermission!!)
         mediaProjection.registerCallback(object : MediaProjection.Callback() {
-                @SuppressLint("LongLogTag")
-                override fun onStop() {
-                    Log.d("MediaProjection:Callback", "onStop")
-                    super.onStop()
-                }
-            }, null)
+            @SuppressLint("LongLogTag")
+            override fun onStop() {
+                Log.d("MediaProjection:Callback", "onStop")
+                super.onStop()
+            }
+        }, null)
         initRecorder(metrics)
         UploadServices.getInstance().getPushUrl().rx().subscribe(){
             upstreamUrl = it.resault
             createLive()
         }
+    }
+    private fun createLive() {
+        rtmpHelper = RtmpHelper()
+        rtmpHelper.setOnConntionListener(object: OnConntionListener{
+            override fun onConntecting() {
+
+            }
+
+            override fun onConntectSuccess() {
+                pushEncode = PushEncode(MainActivity.theContext)
+                pushEncode.initEncoder(true, mediaProjection, screenSize?.width!!, screenSize?.height!!, 44100, 2, 16)
+                pushEncode.setOnMediaInfoListener(object: BasePushEncoder.OnMediaInfoListener {
+                    override fun onMediaTime(times: Int) { }
+
+                    override fun onSPSPPSInfo(sps: ByteArray?, pps: ByteArray?) {
+                        rtmpHelper.pushSPSPPS(sps, pps)
+                    }
+
+                    override fun onVideoDataInfo(data: ByteArray?, keyFrame: Boolean) {
+                        rtmpHelper.pushVideoData(data,keyFrame)
+                    }
+
+                    override fun onAudioInfo(data: ByteArray?) {
+                        rtmpHelper.pushAudioData(data)
+                    }
+
+                })
+                pushEncode.start()
+            }
+
+            override fun onConntectFail(msg: String?) {
+                Log.d(TAG, "onConntectFail:" + msg)
+            }
+
+        })
+        rtmpHelper.initLivePush(upstreamUrl)
     }
     fun perparRecording(path: String) {
         currentFilePath = path
