@@ -101,9 +101,9 @@ class UploadServices {
     companion object {
         const val TAG = "UploadServices"
         var uploadUrl:String = "http://e4x.live:5089/"
+        var uploadDomain:String = "e4x.live"
 //        var uploadUrl:String = "http://192.168.31.240:5089/"
 //        var uploadDomain:String = "192.168.31.240"
-        var uploadDomain:String = "e4x.live"
 
         private var instance:UploadServices? = null
         fun getInstance():UploadServices{

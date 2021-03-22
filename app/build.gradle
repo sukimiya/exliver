@@ -9,7 +9,7 @@ android {
         keystore {
             storeFile file('/Users/lily/AndroidStudioProjects/exliver/keystore')
             storePassword '19547047'
-            keyAlias 'key0'
+            keyAlias 'e4x.live'
             keyPassword '19547047'
         }
     }
