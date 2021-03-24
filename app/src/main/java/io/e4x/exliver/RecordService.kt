@@ -7,6 +7,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -16,7 +17,8 @@ import android.os.IBinder
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
-import android.widget.TextView
+import android.widget.RemoteViews
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.android.camera.utils.SmartSize
@@ -25,7 +27,6 @@ import io.e4x.exliver.controllers.RecordUploader
 import io.e4x.exliver.net.UploadServices
 import io.e4x.exliver.net.rx
 import io.e4x.exliver.utils.Bitrate
-import io.e4x.exliver.utils.DeviceHelper
 import io.e4x.exliver.utils.FileUtil
 import io.e4x.exliver.vo.RecordVO
 import live.rtmp.OnConntionListener
@@ -56,7 +57,7 @@ private const val EXTRA_PARAM2 = "io.e4x.exliver.extra.PARAM2"
  */
 class RecordService : Service() {
 
-    private val NOTIFICATION_ID = 1770
+    private val NOTIFICATION_ID = 1
     private lateinit var fileUtil: FileUtil
     private lateinit var recordFileReader: RecordFileReader
     private lateinit var recordUploader: RecordUploader
@@ -71,7 +72,7 @@ class RecordService : Service() {
     private var virtualDisplay: VirtualDisplay? = null
     private lateinit var upstreamUrl:String
     private lateinit var pushEncode: PushEncode
-
+    var player: MediaPlayer?=null
     @SuppressLint("CheckResult")
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate() {
@@ -80,12 +81,14 @@ class RecordService : Service() {
         recordFileReader = RecordFileReader(this)
         recordUploader = RecordUploader()
         // 获取服务通知
-
+        player =MediaPlayer.create(this,R.raw.bgm);
+        player?.isLooping = true
         // 获取服务通知
         var notification: Notification = createForegroundNotification()
         //将服务置于启动状态 ,NOTIFICATION_ID指的是创建的通知的ID
         //将服务置于启动状态 ,NOTIFICATION_ID指的是创建的通知的ID
         startForeground(NOTIFICATION_ID, notification)
+        Toast.makeText(this,"开始播放...",Toast.LENGTH_SHORT).show();//提示框
     }
     private lateinit var rtmpHelper:RtmpHelper
     private var tempFrame:Boolean = false
@@ -112,7 +115,24 @@ class RecordService : Service() {
                 }
             }
         }
-        return super.onStartCommand(intent, flags, startId)
+        when (intent?.getIntExtra("play", -1)){
+            1 -> {
+                player?.start()//开始
+            }
+            2 -> {
+                if (player!=null&&player?.isPlaying()!!){
+                    player?.pause()
+                } else {
+                    player?.start()
+                }
+            }
+            3 -> {
+                player?.stop();//停止
+                player?.release();//释放内存
+            }
+        }
+//        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -128,6 +148,15 @@ class RecordService : Service() {
         private var mService = service
         fun getService(): RecordService {
             return mService
+        }
+        fun getDuration(): Int? {//获取总进度条
+            return mService.player?.getDuration();
+        }
+        fun getCurrentPosition(): Int? {//获取当前进度条
+            return mService.player?.getCurrentPosition();
+        }
+        fun setProgress(s:Int){//更改当前音乐进度
+            mService.player?.seekTo(s);
         }
     }
     @SuppressLint("CheckResult")
@@ -175,6 +204,7 @@ class RecordService : Service() {
 
                 })
                 pushEncode.start()
+                player?.start()
             }
 
             override fun onConntectFail(msg: String?) {
@@ -211,7 +241,6 @@ class RecordService : Service() {
     /**
      * 创建服务通知
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun createForegroundNotification():Notification {
         // 唯一的通知通道的id.
         var notificationChannelId = "notification_channel_id_01";
@@ -240,6 +269,19 @@ class RecordService : Service() {
         //通知小图标
         //通知小图标
         builder.setSmallIcon(R.drawable.ic_launcher_foreground)
+//        var notiView = RemoteViews(packageName, R.layout.notification)
+//        notiView.setTextViewText(R.id.noti_title, "Exliver")
+//        notiView.setTextViewText(R.id.noti_content, "Capture Screen and push to live!")
+//        val iintent = Intent(this, MainActivity::class.java)
+//        iintent.action = ACTION_STOP
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            notiView.setOnClickResponse(R.id.noti_toggle, RemoteViews.RemoteResponse.fromPendingIntent(PendingIntent.getActivity(this, 0,
+//                    iintent, PendingIntent.FLAG_UPDATE_CURRENT)))
+//        } else {
+//            notiView.setOnClickPendingIntent(R.id.noti_toggle, PendingIntent.getActivity(this, 0,
+//                    iintent, PendingIntent.FLAG_UPDATE_CURRENT))
+//        }
+//        builder.setContent(notiView)
         //通知标题
         //通知标题
         builder.setContentTitle("exliver")
@@ -251,7 +293,7 @@ class RecordService : Service() {
         builder.setWhen(System.currentTimeMillis())
         //设定启动的内容
         //设定启动的内容
-        val activityIntent = Intent(this, NotificationActivity::class.java)
+        val activityIntent = Intent(this, MainActivity::class.java)
         val pendingIntent =
             PendingIntent.getActivity(this, 1, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         builder.setContentIntent(pendingIntent)

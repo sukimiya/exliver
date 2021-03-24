@@ -33,6 +33,7 @@
         <service
             android:foregroundServiceType="mediaProjection"
             android:name=".RecordService"
+            android:enabled="true"
             android:exported="false" />
 
         <activity
