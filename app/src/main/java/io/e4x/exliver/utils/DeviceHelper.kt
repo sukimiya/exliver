@@ -29,7 +29,7 @@ object DeviceHelper {
                     var line: String? = null
                     var message = ""
                     while (fp.readLine().also { line = it } != null) {
-                        message += line + "\n";
+                        message += line;
                     }
                     fp.close()
                     if (message != null && message != "") {
