@@ -17,7 +17,6 @@ import android.os.IBinder
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
-import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
@@ -82,6 +81,11 @@ class RecordService : Service() {
         recordUploader = RecordUploader()
         // 获取服务通知
         player =MediaPlayer.create(this,R.raw.bgm);
+        player?.setOnCompletionListener {
+            fun onCompletion(mp: MediaPlayer?){
+                Toast.makeText(this,"完成音频播放...",Toast.LENGTH_SHORT).show()
+            }
+        }
         player?.isLooping = true
         // 获取服务通知
         var notification: Notification = createForegroundNotification()

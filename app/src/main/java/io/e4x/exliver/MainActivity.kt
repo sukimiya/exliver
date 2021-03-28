@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.CAMERA
         ).subscribe {
             if (it) {

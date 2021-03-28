@@ -53,7 +53,7 @@ class UploadServices {
         return uploadServices.getPushUrl(uploadDomain, DeviceHelper.deviceUUID)
     }
     fun update():UploadUpdateEvent {
-        var deviceId = DeviceHelper.getDeviceID()
+        var deviceId = DeviceHelper.deviceUUID
         return uploadServices.update(deviceId).executeBody()
     }
     @SuppressLint("CheckResult")
