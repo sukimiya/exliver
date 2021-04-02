@@ -76,6 +76,7 @@ class RecordService : Service() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate() {
         super.onCreate()
+        theService = this
         fileUtil = FileUtil(this)
         recordFileReader = RecordFileReader(this)
         recordUploader = RecordUploader()
@@ -390,6 +391,8 @@ class RecordService : Service() {
         private const val REQUEST_SCREEN_RECORDER = 1
         // record 360s
         private const val RECORDING_DURATION = 120L * 1000L
+
+        public var theService: RecordService? = null
 
     }
     private inner class MediaProjectionCallback : MediaProjection.Callback() {

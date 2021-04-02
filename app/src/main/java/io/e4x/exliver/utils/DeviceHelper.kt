@@ -10,6 +10,7 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import io.e4x.exliver.MainActivity
+import io.e4x.exliver.RecordService
 import java.io.*
 import java.lang.Exception
 import java.security.MessageDigest
@@ -20,7 +21,7 @@ object DeviceHelper {
     @SuppressLint("MissingPermission")
     fun getAndroidId(): String {
         if (deviceIdHolder == null) {
-            var folder = MainActivity.theContext?.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            var folder =  RecordService.theService?.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
             if (folder?.exists()!!){
                 var idfile = File(folder.absolutePath + File.separator + ID_STORE_FILE)
                 if(idfile?.exists()) {
@@ -51,7 +52,6 @@ object DeviceHelper {
         if (folder?.exists()!!) {
             folder.mkdir()
         }
-        var tm:TelephonyManager = MainActivity.theContext?.getSystemService(Service.TELEPHONY_SERVICE) as TelephonyManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
                 var androidId = Settings.Secure.getString(MainActivity.theContext?.contentResolver, Settings.Secure.ANDROID_ID).replace("\n","")
@@ -62,8 +62,10 @@ object DeviceHelper {
                 deviceIdHolder = UUID.randomUUID().toString()
             }
         }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            var tm:TelephonyManager = RecordService.theService?.getSystemService(Service.TELEPHONY_SERVICE) as TelephonyManager
             deviceIdHolder = tm.imei
         } else {
+            var tm:TelephonyManager = RecordService.theService?.getSystemService(Service.TELEPHONY_SERVICE) as TelephonyManager
             deviceIdHolder = tm.getDeviceId();
         }
         var saveFile = File(folder.absolutePath + File.separator + ID_STORE_FILE)
