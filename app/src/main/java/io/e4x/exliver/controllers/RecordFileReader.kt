@@ -13,7 +13,7 @@ import java.util.*
 class RecordFileReader(contextWrapper: ContextWrapper) {
     private var contextWrapper = contextWrapper
     private var fileUtil = FileUtil(contextWrapper)
-    private var uploadServices: UploadServices = UploadServices.getInstance()
+    private var uploadServices: UploadServices = UploadServices.getInstance(contextWrapper)
     var recordList: MutableList<RecordVO> = mutableListOf()
     init {
         onStart()

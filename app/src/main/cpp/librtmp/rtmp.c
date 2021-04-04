@@ -1294,6 +1294,7 @@ WriteN(RTMP *r, const char *buffer, int n) {
                 continue;
 
             RTMP_Close(r);
+            // n = 1; 都close了为什么while不结束？
             n = 1;
             break;
         }
@@ -2973,8 +2974,8 @@ RTMP_SendPacket(RTMP *r, RTMPPacket *packet, int queue) {
 
     if (packet->m_headerType > 3)    /* sanity */
     {
-        RTMP_Log(RTMP_LOGERROR, "sanity failed!! trying to send header of type: 0x%02x.",
-                 (unsigned char) packet->m_headerType);
+//        RTMP_Log(RTMP_LOGERROR, "sanity failed!! trying to send header of type: 0x%02x.",
+//                 (unsigned char) packet->m_headerType);
         return FALSE;
     }
 
@@ -3044,8 +3045,8 @@ RTMP_SendPacket(RTMP *r, RTMPPacket *packet, int queue) {
     buffer = packet->m_body;
     nChunkSize = r->m_outChunkSize;
 
-    RTMP_Log(RTMP_LOGDEBUG2, "%s: fd=%d, size=%d", __FUNCTION__, r->m_sb.sb_socket,
-             nSize);
+//    RTMP_Log(RTMP_LOGDEBUG2, "%s: fd=%d, size=%d", __FUNCTION__, r->m_sb.sb_socket,
+//             nSize);
     /* send all chunks in one HTTP request */
     if (r->Link.protocol & RTMP_FEATURE_HTTP) {
         int chunks = (nSize + nChunkSize - 1) / nChunkSize;
@@ -3063,8 +3064,8 @@ RTMP_SendPacket(RTMP *r, RTMPPacket *packet, int queue) {
         if (nSize < nChunkSize)
             nChunkSize = nSize;
 
-        RTMP_LogHexString(RTMP_LOGDEBUG2, (uint8_t *) header, hSize);
-        RTMP_LogHexString(RTMP_LOGDEBUG2, (uint8_t *) buffer, nChunkSize);
+//        RTMP_LogHexString(RTMP_LOGDEBUG2, (uint8_t *) header, hSize);
+//        RTMP_LogHexString(RTMP_LOGDEBUG2, (uint8_t *) buffer, nChunkSize);
         if (tbuf) {
             memcpy(toff, header, nChunkSize + hSize);
             toff += nChunkSize + hSize;
@@ -3107,7 +3108,7 @@ RTMP_SendPacket(RTMP *r, RTMPPacket *packet, int queue) {
         char *ptr;
         ptr = packet->m_body + 1;
         AMF_DecodeString(ptr, &method);
-        RTMP_Log(RTMP_LOGDEBUG, "Invoking %s", method.av_val);
+//        RTMP_Log(RTMP_LOGDEBUG, "Invoking %s", method.av_val);
         /* keep it in call queue till result arrives */
         if (queue) {
             int txn;
@@ -3132,10 +3133,12 @@ void
 RTMP_Close(RTMP *r) {
     int i;
 
+    // RTMP_IsConnected 在断网后没有反应
     if (RTMP_IsConnected(r)) {
         if (r->m_stream_id > 0) {
-            if ((r->Link.protocol & RTMP_FEATURE_WRITE))
-                SendFCUnpublish(r);
+            // 引起Crash, 断开连接了还执行这一句
+//            if ((r->Link.protocol & RTMP_FEATURE_WRITE))
+//                SendFCUnpublish(r);
             i = r->m_stream_id;
             r->m_stream_id = 0;
             SendDeleteStream(r, i);

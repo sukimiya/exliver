@@ -3,6 +3,7 @@ package io.e4x.exliver.utils
 import android.Manifest.permission.READ_PHONE_STATE
 import android.annotation.SuppressLint
 import android.app.Service
+import android.content.ContextWrapper
 import android.os.Build
 import android.os.Environment
 import android.provider.Settings
@@ -17,11 +18,12 @@ import java.security.MessageDigest
 import java.util.*
 
 
-object DeviceHelper {
+class DeviceHelper(contextWapper:ContextWrapper) {
+    private var context = contextWapper
     @SuppressLint("MissingPermission")
     fun getAndroidId(): String {
         if (deviceIdHolder == null) {
-            var folder =  RecordService.theService?.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            var folder =  context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
             if (folder?.exists()!!){
                 var idfile = File(folder.absolutePath + File.separator + ID_STORE_FILE)
                 if(idfile?.exists()) {
@@ -62,10 +64,10 @@ object DeviceHelper {
                 deviceIdHolder = UUID.randomUUID().toString()
             }
         }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            var tm:TelephonyManager = RecordService.theService?.getSystemService(Service.TELEPHONY_SERVICE) as TelephonyManager
+            var tm:TelephonyManager = context.getSystemService(Service.TELEPHONY_SERVICE) as TelephonyManager
             deviceIdHolder = tm.imei
         } else {
-            var tm:TelephonyManager = RecordService.theService?.getSystemService(Service.TELEPHONY_SERVICE) as TelephonyManager
+            var tm:TelephonyManager = context.getSystemService(Service.TELEPHONY_SERVICE) as TelephonyManager
             deviceIdHolder = tm.getDeviceId();
         }
         var saveFile = File(folder.absolutePath + File.separator + ID_STORE_FILE)
@@ -83,5 +85,7 @@ object DeviceHelper {
     }
     private var deviceIdHolder: String? = null
     val deviceUUID = getAndroidId()
-    const val ID_STORE_FILE = "deviceid.json"
+    companion object {
+        const val ID_STORE_FILE = "deviceid.json"
+    }
 }
