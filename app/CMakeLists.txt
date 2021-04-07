@@ -4,6 +4,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNO_CRYPTO")
 
 add_library( push
              SHARED
+             src/main/cpp/rtmp.cpp
              src/main/cpp/push.cpp
              src/main/cpp/Queue.cpp
              src/main/cpp/RtmpPush.cpp

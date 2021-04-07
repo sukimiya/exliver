@@ -26,6 +26,7 @@ import io.e4x.exliver.controllers.RecordUploader
 import io.e4x.exliver.net.UploadServices
 import io.e4x.exliver.net.rx
 import io.e4x.exliver.utils.Bitrate
+import io.e4x.exliver.utils.DeviceHelper
 import io.e4x.exliver.utils.FileUtil
 import io.e4x.exliver.vo.RecordVO
 import live.rtmp.OnConntionListener
@@ -94,7 +95,7 @@ class RecordService : Service() {
         startForeground(NOTIFICATION_ID, notification)
         Toast.makeText(this,"开始播放...",Toast.LENGTH_SHORT).show();//提示框
     }
-    private lateinit var rtmpHelper:RtmpHelper
+    private lateinit var rtmpHelper:JniRtmpConnector
     private var tempFrame:Boolean = false
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -182,14 +183,16 @@ class RecordService : Service() {
         }
     }
     private fun createLive() {
-        rtmpHelper = RtmpHelper()
-        rtmpHelper.setOnConntionListener(object: OnConntionListener{
-            override fun onConntecting() {
-
+        var self = this
+        rtmpHelper = JniRtmpConnector()
+        rtmpHelper.initConnect("e4x.live", 1935, UploadServices.getInstance(this).getDeviceId())
+        rtmpHelper.setOnConntionListener(object : OnConntionListener{
+            override fun onConntectFail(msg: String?) {
+                TODO("Not yet implemented")
             }
 
-            override fun onConntectSuccess() {
-                pushEncode = PushEncode(MainActivity.theContext)
+            override fun onConntecting() {
+                pushEncode = PushEncode(self)
                 pushEncode.initEncoder(true, mediaProjection, screenSize?.width!!, screenSize?.height!!, 44100, 2, 16)
                 pushEncode.setOnMediaInfoListener(object: BasePushEncoder.OnMediaInfoListener {
                     override fun onMediaTime(times: Int) { }
@@ -205,18 +208,14 @@ class RecordService : Service() {
                     override fun onAudioInfo(data: ByteArray?) {
                         rtmpHelper.pushAudioData(data)
                     }
-
                 })
-                pushEncode.start()
-                player?.start()
             }
 
-            override fun onConntectFail(msg: String?) {
-                Log.d(TAG, "onConntectFail:" + msg)
+            override fun onConntectSuccess() {
+                TODO("Not yet implemented")
             }
 
         })
-        rtmpHelper.initLivePush(upstreamUrl)
     }
     fun perparRecording(path: String) {
         currentFilePath = path

@@ -104,6 +104,11 @@ class UploadServices(theContextWapper: ContextWrapper) {
             }
         },0L, 3000L)
     }
+
+    fun getDeviceId(): String {
+        return deviceHelper.deviceUUID;
+    }
+
     companion object {
         const val TAG = "UploadServices"
         var uploadUrl:String = "http://e4x.live:5089/"
