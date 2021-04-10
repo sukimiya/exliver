@@ -226,7 +226,7 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
         }
     }
 
-    override fun onConntecting() {
+    override fun onConntecting(msg: String) {
         Log.e(TAG, "RTMPHelper onConntecting")
     }
 

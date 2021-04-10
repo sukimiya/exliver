@@ -34,9 +34,9 @@ public class RtmpHelper {
     }
 
 
-    private void onConntecting() {
+    private void onConntecting(String msg) {
         if (mOnConntionListener != null) {
-            mOnConntionListener.onConntecting();
+            mOnConntionListener.onConntecting(msg);
         }
     }
 

@@ -5,7 +5,6 @@ RtmpPush::RtmpPush(const char *url, CallJava *callJava) {
     this->url = static_cast<char *>(malloc(512));
     strcpy(this->url, url);
     this->queue = new Queue();
-
     this->callJava = callJava;
 }
 
@@ -26,7 +25,7 @@ RtmpPush::~RtmpPush() {
 void *callbackPush(void *data) {
     RtmpPush *rtmpPush = static_cast<RtmpPush *>(data);
     rtmpPush->isStartPush = false;
-    rtmpPush->callJava->conn(THREAD_CHILD);
+    rtmpPush->callJava->conn(THREAD_CHILD, 0);
 
     rtmpPush->rtmp = RTMP_Alloc();
     RTMP_Init(rtmpPush->rtmp);
@@ -59,6 +58,13 @@ void *callbackPush(void *data) {
             // queue 缓存队列大小
             int result = RTMP_SendPacket(rtmpPush->rtmp, packet, 1);
 //            LOGD("t:%d", result);
+            if(result == 0) {
+                rtmpPush->callJava->connf(THREAD_CHILD, "RTMP_Close");
+                rtmpPush->isStartPush = false;
+                goto end;
+            } else {
+                rtmpPush->callJava->conn(THREAD_CHILD, result);
+            }
             RTMPPacket_Free(packet);
             free(packet);
             packet = NULL;

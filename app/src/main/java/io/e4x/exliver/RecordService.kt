@@ -17,6 +17,7 @@ import android.os.IBinder
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
+import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
@@ -34,6 +35,7 @@ import live.rtmp.encoder.BasePushEncoder
 import live.rtmp.encoder.PushEncode
 import java.io.File
 import java.io.IOException
+import java.lang.Exception
 import java.util.*
 
 
@@ -69,7 +71,7 @@ class RecordService : Service() {
     private var screenSize: Size? = null
     private var isInitialized = false
     private var virtualDisplay: VirtualDisplay? = null
-    private lateinit var upstreamUrl:String
+    private var upstreamUrl:String = ""
     private lateinit var pushEncode: PushEncode
     var player: MediaPlayer?=null
     @SuppressLint("CheckResult")
@@ -88,7 +90,7 @@ class RecordService : Service() {
         }
         player?.isLooping = true
         // 获取服务通知
-        var notification: Notification = createForegroundNotification()
+        var notification: Notification = createForegroundNotification("Capture Screen and push to live!", R.drawable.ic_icon_live)
         //将服务置于启动状态 ,NOTIFICATION_ID指的是创建的通知的ID
         //将服务置于启动状态 ,NOTIFICATION_ID指的是创建的通知的ID
         startForeground(NOTIFICATION_ID, notification)
@@ -176,20 +178,40 @@ class RecordService : Service() {
             }
         }, null)
         initRecorder(metrics)
-        UploadServices.getInstance(this).getPushUrl().rx().subscribe(){
-            upstreamUrl = it.resault
+        getPushUrl()
+    }
+    private fun getPushUrl() {
+        if(upstreamUrl == "") {
+            try {
+                UploadServices.getInstance(this).getPushUrl().rx().subscribe() {
+                    upstreamUrl = it.resault
+                    createLive()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Timer().schedule(object : TimerTask() {
+                    override fun run() {
+                        getPushUrl()
+                    }
+
+                }, 3000L)
+            }
+        } else {
             createLive()
         }
     }
     private fun createLive() {
+        val self = this
         rtmpHelper = RtmpHelper()
         rtmpHelper.setOnConntionListener(object: OnConntionListener{
-            override fun onConntecting() {
-
+            override fun onConntecting(msg: String) {
+                if(msg!=null){
+//                    notify("Now living buffer:"+msg, true)
+                }
             }
 
             override fun onConntectSuccess() {
-                pushEncode = PushEncode(MainActivity.theContext)
+                pushEncode = PushEncode(self)
                 pushEncode.initEncoder(true, mediaProjection, screenSize?.width!!, screenSize?.height!!, 44100, 2, 16)
                 pushEncode.setOnMediaInfoListener(object: BasePushEncoder.OnMediaInfoListener {
                     override fun onMediaTime(times: Int) { }
@@ -209,10 +231,35 @@ class RecordService : Service() {
                 })
                 pushEncode.start()
                 player?.start()
+                notify("connect success!", true, true)
             }
 
             override fun onConntectFail(msg: String?) {
                 Log.d(TAG, "onConntectFail:" + msg)
+                if(msg.equals("RTMP_Close")) {
+                    Log.d(TAG, "RTMP_Close: stop")
+                    if(pushEncode!=null)
+                        pushEncode.stop()
+//                    rtmpHelper.stop()
+                    stop()
+                    Timer().schedule(object : TimerTask(){
+                        override fun run() {
+                            Log.d(TAG, "try recreate live: create")
+                            getPushUrl()
+                        }
+
+                    }, 3000L)
+                    notify("try reconnecting!", false, false)
+                } else {
+                    Timer().schedule(object : TimerTask(){
+                        override fun run() {
+                            Log.d(TAG, "try recreate live: create")
+                            getPushUrl()
+                        }
+
+                    }, 10000L)
+                    notify("try reconnecting!", false, false)
+                }
             }
 
         })
@@ -245,7 +292,8 @@ class RecordService : Service() {
     /**
      * 创建服务通知
      */
-    private fun createForegroundNotification():Notification {
+    private lateinit var notiview:RemoteViews
+    private fun createForegroundNotification(msg:String, isBuffering: Int):Notification {
         // 唯一的通知通道的id.
         var notificationChannelId = "notification_channel_id_01";
 
@@ -273,9 +321,9 @@ class RecordService : Service() {
         //通知小图标
         //通知小图标
         builder.setSmallIcon(R.drawable.ic_launcher_foreground)
-//        var notiView = RemoteViews(packageName, R.layout.notification)
-//        notiView.setTextViewText(R.id.noti_title, "Exliver")
-//        notiView.setTextViewText(R.id.noti_content, "Capture Screen and push to live!")
+        notiview = RemoteViews(packageName, R.layout.notification)
+        notiview.setTextViewText(R.id.noti_title, "Exliver")
+        notiview.setTextViewText(R.id.noti_content, msg)
 //        val iintent = Intent(this, MainActivity::class.java)
 //        iintent.action = ACTION_STOP
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -285,27 +333,39 @@ class RecordService : Service() {
 //            notiView.setOnClickPendingIntent(R.id.noti_toggle, PendingIntent.getActivity(this, 0,
 //                    iintent, PendingIntent.FLAG_UPDATE_CURRENT))
 //        }
-//        builder.setContent(notiView)
-        //通知标题
         //通知标题
         builder.setContentTitle("exliver")
         //通知内容
-        //通知内容
         builder.setContentText("recorder")
         //设定通知显示的时间
-        //设定通知显示的时间
         builder.setWhen(System.currentTimeMillis())
-        //设定启动的内容
         //设定启动的内容
         val activityIntent = Intent(this, MainActivity::class.java)
         val pendingIntent =
             PendingIntent.getActivity(this, 1, activityIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         builder.setContentIntent(pendingIntent)
-
+        // 创建自定义通知
+        builder.setCustomContentView(notiview)
+        notiview.setTextViewText(R.id.noti_content, msg)
+        notiview.setImageViewResource(R.id.sync, isBuffering)
         //创建通知并返回
 
         //创建通知并返回
         return builder.build()
+    }
+    fun notify(msg:String, isBuffering:Boolean, isConnecting:Boolean = true) {
+        var notification: Notification? = null;
+        if(isBuffering) {
+            notification = createForegroundNotification(msg, R.drawable.ic_icon_live)
+        } else {
+            if (isConnecting) {
+                notification = createForegroundNotification(msg, R.drawable.ic_icon_sync)
+            } else {
+                notification = createForegroundNotification(msg, R.drawable.ic_icon_disconnet)
+            }
+        }
+
+        startForeground(NOTIFICATION_ID, notification)
     }
     fun createVirtualDisplay(metrics: DisplayMetrics): VirtualDisplay{
         virtualDisplay =  mediaProjection?.createVirtualDisplay(

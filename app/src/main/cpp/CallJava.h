@@ -18,7 +18,7 @@ public:
 
     ~CallJava();
 
-    void conn(int type);
+    void conn(int type, int i);
     void conns(int type);
     void connf(int type,char * msg);
 };

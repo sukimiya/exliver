@@ -83,23 +83,28 @@ class UploadServices(theContextWapper: ContextWrapper) {
                 if (startUploading) {
                     return
                 }
-                var updateResult = update()
-                if(updateResult.data != null && updateResult.data != ""){
-                    var file = File(updateResult.data)
-                    if(file.exists()) {
-                        startUploading = true
-                        Log.d(TAG, "try upload" + file.absoluteFile)
-                        try {
-                            upload(file.name, file)
-                        } catch (e:NetworkException) {
+                try {
+                    var updateResult = update()
+                    if(updateResult.data != null && updateResult.data != ""){
+                        var file = File(updateResult.data)
+                        if(file.exists()) {
+                            startUploading = true
+                            Log.d(TAG, "try upload" + file.absoluteFile)
+                            try {
+                                upload(file.name, file)
+                            } catch (e:NetworkException) {
+                                startUploading = false
+                                Log.d(TAG, "upload fail:" + e.error)
+                            }
+                            Log.d(TAG,  "upload finish:" + file.absoluteFile)
                             startUploading = false
-                            Log.d(TAG, "upload fail:" + e.error)
+                        } else {
+                            Log.d(TAG, "the file not exists")
                         }
-                        Log.d(TAG,  "upload finish:" + file.absoluteFile)
-                        startUploading = false
-                    } else {
-                        Log.d(TAG, "the file not exists")
                     }
+                } catch (e:Exception) {
+                    e.printStackTrace()
+                    Log.d(TAG, "update connect error")
                 }
             }
         },0L, 3000L)

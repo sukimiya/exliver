@@ -240,7 +240,12 @@ public abstract class BasePushEncoder {
                 byteBuffer.put(buffer);
                 long pts = getAudioPts(size, sampleRate, channel, sampleBit);
 //                Log.e("chenzhu", "AudioTime = " + pts / 1000000.0f);
-                mAudioEncodec.queueInputBuffer(inputBufferIndex, 0, size, pts, 0);
+                try{
+                    mAudioEncodec.queueInputBuffer(inputBufferIndex, 0, size, pts, 0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
         }
     }

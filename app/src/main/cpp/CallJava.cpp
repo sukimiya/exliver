@@ -3,6 +3,8 @@
 //
 
 #include "CallJava.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 
 CallJava::CallJava(JNIEnv *jniEnv, JavaVM *javaVM, const jobject *jobj) {
@@ -12,7 +14,7 @@ CallJava::CallJava(JNIEnv *jniEnv, JavaVM *javaVM, const jobject *jobj) {
     this->jobj = jniEnv->NewGlobalRef(*jobj);
     jclass jcs = jniEnv->GetObjectClass(this->jobj);
 
-    this->jmid_conn = jniEnv->GetMethodID(jcs, "onConntecting", "()V");
+    this->jmid_conn = jniEnv->GetMethodID(jcs, "onConntecting", "(Ljava/lang/String;)V");
     this->jmid_conns = jniEnv->GetMethodID(jcs, "onConntectSuccess", "()V");
     this->jmid_connf = jniEnv->GetMethodID(jcs, "onConntectFail", "(Ljava/lang/String;)V");
 }
@@ -23,7 +25,7 @@ CallJava::~CallJava() {
     this->jniEnv = NULL;
 }
 
-void CallJava::conn(int type) {
+void CallJava::conn(int type, int i) {
     if (type == THREAD_MAIN) {
         this->jniEnv->CallVoidMethod(jobj, jmid_conn);
     } else {
@@ -31,7 +33,10 @@ void CallJava::conn(int type) {
         if (this->javaVM->AttachCurrentThread(&jniEnv, 0) != JNI_OK) {
             return;
         }
-        jniEnv->CallVoidMethod(jobj, jmid_conn);
+        char string[25];
+        sprintf(string, "%d", i);
+        jstring s = jniEnv->NewStringUTF(string);
+        jniEnv->CallVoidMethod(jobj, jmid_conn, s);
         javaVM->DetachCurrentThread();
     }
 }

@@ -15,7 +15,7 @@ fun <T> Call<T>.rx(): Observable<T> {
             it.onNext(executeBody())
             it.onComplete()
         } catch (e: Exception) {
-            it.onError(e)
+//            it.onError(e)
         }
     }.doOnError {
         it.stackTrace.map {
