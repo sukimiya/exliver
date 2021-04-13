@@ -11,6 +11,9 @@ public class JniRtmpConnector {
     public void sendData(byte[] data, boolean keyFrame) {
         send(data, data.length, keyFrame);
     }
+    public void sendAudioData(byte[] data) {
+        sendAudio(data, data.length);
+    }
     public void disconnect() {
         stop();
     }
@@ -42,6 +45,7 @@ public class JniRtmpConnector {
 
     private native void connect(String server, int port, String deviceId);
     private native void send(byte[] data, long len, boolean keyFrame);
+    private native void sendAudio(byte[] data, long len);
     private native void stop();
 
     public void pushSPSPPS(@Nullable byte[] sps, @Nullable byte[] pps) {
@@ -53,6 +57,6 @@ public class JniRtmpConnector {
     }
 
     public void pushAudioData(@Nullable byte[] data) {
-
+        sendAudioData(data);
     }
 }

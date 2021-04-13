@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "UdxTcpSink_P2p.h"
 
 #define P2PSERVER_ADDR ("47.102.121.213")

@@ -9,6 +9,7 @@ add_library( push
              src/main/cpp/Queue.cpp
              src/main/cpp/RtmpPush.cpp
              src/main/cpp/CallJava.cpp
+             src/main/cpp/UdxTcpSink_P2p.cpp
 
              src/main/cpp/librtmp/amf.c
              src/main/cpp/librtmp/hashswf.c
@@ -16,7 +17,10 @@ add_library( push
              src/main/cpp/librtmp/parseurl.c
              src/main/cpp/librtmp/rtmp.c
               )
-
-
+add_library(fudx SHARED IMPORTED)
+set_target_properties(fudx
+                      PROPERTIES IMPORTED_LOCATION
+                      ${CMAKE_SOURCE_DIR}/src/main/libs/${CMAKE_ANDROID_ARCH_ABI}/libfudx.so)
 target_link_libraries( push
+                       fudx
                        log)
