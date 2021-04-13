@@ -27,10 +27,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.OnMediaInfoListener {
+class MainActivity : AppCompatActivity() {
 
-    private lateinit var pushEncode: PushEncode
-    private var rtmpHelper: RtmpHelper? = null
     private var livingURL = "rtmp://81.69.31.51:1935/oflaDemo/"
     private lateinit var msgBinder: RecordService.MsgBinder
     private lateinit var recordService: RecordService
@@ -208,9 +206,7 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
     }
     private fun stopLiving() {
         // stop living
-        rtmpHelper?.stop()
         mMediaProjection?.stop()
-        rtmpHelper = null
         mMediaProjection = null
         Log.v(TAG, "living Stopped")
     }
@@ -224,43 +220,6 @@ class MainActivity : AppCompatActivity(), OnConntionListener, BasePushEncoder.On
 //            mMediaProjection = null
             Log.i(TAG, "MediaProjection Stopped")
         }
-    }
-
-    override fun onConntecting() {
-        Log.e(TAG, "RTMPHelper onConntecting")
-    }
-
-    override fun onConntectSuccess() {
-        Log.e(TAG, "RTMPHelper onConntectSuccess")
-        startPush()
-    }
-    private fun startPush() {
-        pushEncode = PushEncode(this)
-        pushEncode.initEncoder(true, mMediaProjection, 480, 720, 44100, 2, 16)
-        pushEncode.setOnMediaInfoListener(this)
-        pushEncode.start()
-    }
-
-    override fun onConntectFail(msg: String?) {
-        Log.e(TAG, "PushEncode onConntectFail")
-        btnRecorder.isChecked = false
-    }
-
-    override fun onMediaTime(times: Int) { }
-
-    override fun onSPSPPSInfo(sps: ByteArray?, pps: ByteArray?) {
-        if (rtmpHelper == null) return
-        rtmpHelper?.pushSPSPPS(sps, pps)
-    }
-
-    override fun onVideoDataInfo(data: ByteArray?, keyFrame: Boolean) {
-        if (rtmpHelper == null) return
-        rtmpHelper?.pushVideoData(data, keyFrame)
-    }
-
-    override fun onAudioInfo(data: ByteArray?) {
-        if (rtmpHelper == null) return
-        rtmpHelper?.pushAudioData(data)
     }
     private fun updateTimerText(){
         playtimerTextView.text = System.currentTimeMillis().toString()
