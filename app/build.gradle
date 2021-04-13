@@ -30,7 +30,7 @@ android {
 //        }
         externalNativeBuild {
             cmake {
-                targets 'FastUdx'
+                targets 'fudx-lib'
             }
         }
     }
