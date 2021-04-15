@@ -2,7 +2,7 @@
 
 #include "include/FastUdx.h"
 
-#pragma comment(lib,"./udx/lib/x86/FastUdx.lib")
+//#pragma comment(lib,"./udx/lib/x86/FastUdx.lib")
 
 #define VIDEO_CHANNEL_COUNT 3
 

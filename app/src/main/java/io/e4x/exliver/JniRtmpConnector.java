@@ -19,21 +19,21 @@ public class JniRtmpConnector {
     }
     private OnConntionListener mOnConntionListener;
     static {
-        System.loadLibrary("rtmp");
+        System.loadLibrary("MFastUdx");
     }
-    private void onConntecting() {
+    public void onConntecting() {
         if (mOnConntionListener != null) {
             mOnConntionListener.onConntecting();
         }
     }
 
-    private void onConntectSuccess() {
+    public void onConntectSuccess() {
         if (mOnConntionListener != null) {
             mOnConntionListener.onConntectSuccess();
         }
     }
 
-    private void onConntectFail(String msg) {
+    public void onConntectFail(String msg) {
         if (mOnConntionListener != null) {
             mOnConntionListener.onConntectFail(msg);
         }

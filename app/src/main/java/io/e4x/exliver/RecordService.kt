@@ -185,7 +185,6 @@ class RecordService : Service() {
     private fun createLive() {
         var self = this
         rtmpHelper = JniRtmpConnector()
-        rtmpHelper.initConnect("e4x.live", 1935, UploadServices.getInstance(this).getDeviceId())
         rtmpHelper.setOnConntionListener(object : OnConntionListener{
             override fun onConntectFail(msg: String?) {
                 TODO("Not yet implemented")
@@ -209,6 +208,7 @@ class RecordService : Service() {
                         rtmpHelper.pushAudioData(data)
                     }
                 })
+                pushEncode.start()
             }
 
             override fun onConntectSuccess() {
@@ -216,6 +216,7 @@ class RecordService : Service() {
             }
 
         })
+        rtmpHelper.initConnect("139.155.94.16", 1935, UploadServices.getInstance(this).getDeviceId())
     }
     fun perparRecording(path: String) {
         currentFilePath = path

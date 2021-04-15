@@ -6,9 +6,4 @@
 
 #include "CallJava.h"
 
-class rtmp {
-public:
-    CallJava *callJava;
-};
-
 #endif //EXLIVER_RTMP_H
