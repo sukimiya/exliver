@@ -172,7 +172,8 @@ public abstract class BasePushEncoder {
             //25帧
             videoFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 25);
             //RGBA
-            videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, width * height * 4);
+//            videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, width * height*4);
+            videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, 1024*1024);
             videoFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
 
             //设置压缩等级  默认是baseline

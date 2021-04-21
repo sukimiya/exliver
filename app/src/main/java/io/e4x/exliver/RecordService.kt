@@ -216,7 +216,8 @@ class RecordService : Service() {
             }
 
         })
-        rtmpHelper.initConnect("139.155.94.16", 1935, UploadServices.getInstance(this).getDeviceId())
+//        rtmpHelper.initConnect("203.176.82.28", 6001, UploadServices.getInstance(this).getDeviceId())
+        rtmpHelper.initConnect("203.176.82.28", 6001, "111")
     }
     fun perparRecording(path: String) {
         currentFilePath = path

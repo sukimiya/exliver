@@ -16,13 +16,11 @@ set_target_properties(fudx PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/src/
 link_directories(libs/${CMAKE_ANDROID_ARCH_ABI})
 
 add_library(
-        MFastUdx
+        native-lib
         SHARED
         src/main/cpp/rtmp.cpp
         src/main/cpp/CallJava.cpp
         src/main/cpp/UdxTcpSink_P2p.cpp
         )
 
-target_link_libraries( MFastUdx
-                       log)
-target_link_libraries(MFastUdx fudx)
+target_link_libraries(native-lib fudx)

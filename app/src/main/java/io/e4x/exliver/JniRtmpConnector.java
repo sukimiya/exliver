@@ -8,6 +8,7 @@ public class JniRtmpConnector {
     public void initConnect(String server, int port, String deviceId) {
         connect(server, port, deviceId);
     }
+    public void sendSPSPPSData(byte[] sps, byte[] pps){ sendSPSPPS(sps,pps);}
     public void sendData(byte[] data, boolean keyFrame) {
         send(data, data.length, keyFrame);
     }
@@ -19,7 +20,8 @@ public class JniRtmpConnector {
     }
     private OnConntionListener mOnConntionListener;
     static {
-        System.loadLibrary("MFastUdx");
+        System.loadLibrary("native-lib");
+        System.loadLibrary("fudx");
     }
     public void onConntecting() {
         if (mOnConntionListener != null) {
@@ -46,10 +48,11 @@ public class JniRtmpConnector {
     private native void connect(String server, int port, String deviceId);
     private native void send(byte[] data, long len, boolean keyFrame);
     private native void sendAudio(byte[] data, long len);
+    private native void sendSPSPPS(byte[] sps, byte[] pps);
     private native void stop();
 
     public void pushSPSPPS(@Nullable byte[] sps, @Nullable byte[] pps) {
-
+        sendSPSPPSData(sps,pps);
     }
 
     public void pushVideoData(@Nullable byte[] data, boolean keyFrame) {

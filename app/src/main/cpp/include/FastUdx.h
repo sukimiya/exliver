@@ -124,6 +124,8 @@ enum ERROCODE
 
 #include "mntypedef.h"
 
+#define UDX_P2P_REGISTER_MSG_LINK_FLAG	1//UDX P2P 消息联接
+#define UDX_P2P_DATATRANS_LINK_FLAG	2//UDX P2P 数据联接
 
 #ifdef WIN32
 #pragma pack( push, 1 )
@@ -140,7 +142,10 @@ enum ERROCODE
 #endif
 
 
-typedef void (CALLBACK UDXPRC)(int eventtype ,int erro,long s, BYTE* pData, int len);
+typedef void* UFASTUDX;
+typedef void* UDXTCP;
+
+typedef void (CALLBACK UDXPRC)(int eventtype, int erro, UDXTCP s, BYTE* pData, int len);
 typedef void (CALLBACK UDXP2PPRC)(char* user1,char* user2,UINT64 dwuser);
 
 typedef UDXPRC FAR *LPUDXPRC;
@@ -219,6 +224,7 @@ public:
 	virtual void UpDateCurrentSpeed()=0;														//刷新各种信息
 	virtual float GetLostRate() = 0;															//当前丢包率
 	virtual float GetLostRate2() = 0;															//实时丢包率
+	virtual DWORD GetLastAvgSendSpeed() = 0;
 	
 	//备注:
 	//当联接建立以后,各种参数都会自动在UDX内部去不断更新,但是,应用层也可以调用reset进行重新计算,但是调用RESET不会引
@@ -235,10 +241,7 @@ struct IUdxCfg									//单个UDX的一些设置
 	int expectbew;					//固定流量（B/秒），
 	int maxsendbew;					//单条连接最大流量(B/S)
 	int minsendbew;					//设置最低流量
-
-	int crazymode;					//废弃
-
-
+	int gamemode;			//最大乱序距离
 	int mergeframe;					//是否合并包发送
 
 	int brokenframe;				//废弃
@@ -284,12 +287,32 @@ struct UdxConnectInfo
 {
 	UDP_SHORT linktype;
 	UDP_SHORT linkindex;
-	UDP_BYTE rtpmode:1;//消息通道，通过不可靠的RTP + FEC方式
+	UDP_BYTE rtpmode:1;
 	UDP_BYTE linksubtype:7;
-	UDP_BYTE notused1;
+	UDP_BYTE internaltype:4;//内部链接类型
+	UDP_BYTE notused1:4;
 	UDP_BYTE notused2;
 	UDP_BYTE notused3;
 	UDP_BYTE notused4;
+}UDXPACKED;
+
+#define P2PIDLEN	64
+
+class IUdxBuff;
+struct Udx_P2p_TS_Info
+{
+	int bCaller;
+	UDP_SHORT p2pindex;
+	UdxConnectInfo coninfo;
+	char self[P2PIDLEN];			//用户1,一般是自己的用户ID别名
+	char des[P2PIDLEN];			//用户2，对方的ID,别名
+	char dessn[P2PIDLEN];			//用户2，对方的ID
+	char p2pserver[P2PIDLEN];		//p2p服务器IP
+	char tsserver[P2PIDLEN];		//TS服务器IP
+	UDP_SHORT p2pport;		//
+	UDP_SHORT tsport;		//
+	UINT64 userdata;
+	IUdxBuff* pInitData;
 }UDXPACKED;
 
 class IUdxUnkownPackSink		//对于非UDX的UDP包，设置了这个回调后，会回调出这些包，给应用处理
@@ -361,7 +384,7 @@ public:
 	//得到当前收发了百分比
 	virtual float GetPercent(BOOL bSend) = 0;
 	//发送文件
-	virtual void SendFile(char* filename) = 0;
+	virtual int SendFile(char* filename) = 0;
 	//发送是否完成,当接收方返回真时，不能立即删除UDX对象，保证在发送方进行删除UDX对象
 	virtual BOOL IsDone(BOOL bSend) = 0;
 	//设置保存文件路径目录
@@ -504,10 +527,12 @@ public:
 	virtual int SetFecParam(int ch,int k,int n) = 0;//设置FEC参数九
 	virtual long GetSpendTime(BOOL bSend) = 0;//返回收发文件花费的时间，毫秒数，兼容接口
 	virtual BOOL LinkCpyRoute(IUdxTcp* pTcp,BOOL bAndClose) = 0;//从中转切到直联模式，此接口必须要本地存在，一个TS链接和直联对象
-	virtual UDP_SHORT P2pConnectTo(char* szDesSN,UDP_SHORT sublinktype = 0) = 0;
+	virtual UDP_SHORT P2pConnectTo(char* szDesSN,UdxConnectInfo * pConnectInfo) = 0;
 	virtual SOCKADDR *Get3wAddr() = 0;
 	virtual void DownloadP2pUserLists() = 0;
-	virtual UDP_BYTE GetSubLinkIndex() = 0;//获取子联接信息
+	virtual UDP_BYTE GetLinkSubType() = 0;//获取子联接信息
+	virtual UDP_BYTE GetLinkInternalType() = 0;//获取子联接信息
+	virtual int GetLinkLost() = 0;
 };
 
 //=======================================容易混淆的几个方法==========================================//
@@ -594,25 +619,6 @@ public:
 	virtual int OutputUdxData( struct sockaddr * adrrto,BYTE* pData,int len) = 0;//发送地址及待发送的数据及长度
 };
 
-#define P2PIDLEN	64
-
-struct Udx_P2p_TS_Info
-{
-	UDP_SHORT p2pindex;
-	UDP_BYTE SubIndex;//作为业务区分类型：范围0 ~ 2^7
-	int bCaller;
-	char self[P2PIDLEN];			//用户1,一般是自己的用户ID别名
-	char des[P2PIDLEN];			//用户2，对方的ID,别名
-	char dessn[P2PIDLEN];			//用户2，对方的ID
-	char p2pserver[32];		//p2p服务器IP
-	char tsserver[32];		//TS服务器IP
-	UDP_SHORT p2pport;		//
-	UDP_SHORT tsport;		//
-	UINT64 userdata;
-	IUdxBuff* pInitData;
-};
-
-#define UDX_P2P_MSG_LINK_FLAG	65532
 
 class IFastUdx//UDX实例对象 ==============    UDX 核心对象       ====================
 {
@@ -659,6 +665,7 @@ public:
 	virtual void PostP2pRequest(Udx_P2p_TS_Info* pP2pInfo) = 0;					//发起P2P请求
 	virtual void SetUdxUdpBase(IUdxUdpIOBase* pIOBase) = 0;						//设置UDP收发原始接口
 	virtual void PostLoopClientsEvent(int type,IUdxBuff* pData) = 0;			//投递一个客户端轮询
+	virtual void EnableFileTransmit(BOOL bEnable) = 0;
 };
 
 class IMultCardTcp																//多个网卡 绑定后，同时为一个流发送数据，或接收数据

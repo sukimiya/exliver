@@ -1,10 +1,6 @@
 #pragma once
 
-#include "include/FastUdx.h"
-
-//#pragma comment(lib,"./udx/lib/x86/FastUdx.lib")
-
-#define VIDEO_CHANNEL_COUNT 3
+#include <include/FastUdx.h>
 
 class UdxTcpSink_P2p : public IUdxTcpSink {
 public:
@@ -12,9 +8,11 @@ public:
     virtual ~UdxTcpSink_P2p();
 public:
 	void SendFrame(int bvideo,int bkey,BYTE* pData,int len);
+	int P2pConnectDevice(char* szDeviceName);
 private:
     IFastUdx* m_pFastUdx;
 	IUdxTcp* m_pTcpData;
+	IUdxTcp* m_pTcpRegister;
 	BOOL m_bShutdown;
 	IUdxLock * m_pLock;
 	string m_name;
